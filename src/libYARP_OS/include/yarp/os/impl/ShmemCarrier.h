@@ -38,7 +38,7 @@ public:
 
     virtual Carrier *create();
 
-    virtual String getName();
+    virtual yarp::os::ConstString getName();
 
     virtual int getSpecifierCode();
     virtual bool requireAck();

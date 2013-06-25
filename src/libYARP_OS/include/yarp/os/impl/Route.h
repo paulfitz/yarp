@@ -10,7 +10,7 @@
 #ifndef _YARP2_ROUTE_
 #define _YARP2_ROUTE_
 
-#include <yarp/os/impl/String.h>
+#include <yarp/os/ConstString.h>
 
 namespace yarp {
     namespace os {
@@ -41,9 +41,9 @@ public:
      * @param toKey Destination of route.
      * @param carrier Type of carrier.
      */
-    Route(const String& fromKey,
-          const String& toKey,
-          const String& carrier) :
+    Route(const yarp::os::ConstString& fromKey,
+          const yarp::os::ConstString& toKey,
+          const yarp::os::ConstString& carrier) :
             fromKey(fromKey),
             toKey(toKey),
             carrier(carrier) {
@@ -65,7 +65,7 @@ public:
      *
      * @return the source of the route (a port name)
      */
-    const String& getFromName() const {
+    const yarp::os::ConstString& getFromName() const {
         return fromKey;
     }
 
@@ -75,7 +75,7 @@ public:
      *
      * @return the destination of the route (a port name)
      */
-    const String& getToName() const {
+    const yarp::os::ConstString& getToName() const {
         return toKey;
     }
 
@@ -85,7 +85,7 @@ public:
      *
      * @return the carrier type of the route.
      */
-    const String& getCarrierName() const {
+    const yarp::os::ConstString& getCarrierName() const {
         return carrier;
     }
 
@@ -96,7 +96,7 @@ public:
      *
      * @return the created route.
      */
-    Route addFromName(const String& fromName) const {
+    Route addFromName(const yarp::os::ConstString& fromName) const {
         return Route(fromName,getToName(),getCarrierName());
     }
 
@@ -107,7 +107,7 @@ public:
      *
      * @return the created route.
      */
-    Route addToName(const String& toName) const {
+    Route addToName(const yarp::os::ConstString& toName) const {
         return Route(getFromName(),toName,getCarrierName());
     }
 
@@ -118,7 +118,7 @@ public:
      *
      * @return the created route.
      */
-    Route addCarrierName(const String& carrierName) const {
+    Route addCarrierName(const yarp::os::ConstString& carrierName) const {
         return Route(getFromName(),getToName(),carrierName);
     }
 
@@ -127,15 +127,15 @@ public:
      *
      * @return the route in text form.
      */
-    String toString() const {
+    yarp::os::ConstString toString() const {
         return getFromName() + "->" + getCarrierName() + "->" +
             getToName();
     }
 
 private:
-    String fromKey;
-    String toKey;
-    String carrier;
+    yarp::os::ConstString fromKey;
+    yarp::os::ConstString toKey;
+    yarp::os::ConstString carrier;
 };
 
 #endif

@@ -103,7 +103,7 @@ void PortCoreOutputUnit::runSimulation() {
         setMode();
         getOwner().reportUnit(this,true);
 
-        String msg = String("Sending output from ") +
+        ConstString msg = ConstString("Sending output from ") +
             route.getFromName() + " to " + route.getToName() + " using " +
             route.getCarrierName();
         if (Name(route.getToName()).isRooted()) {
@@ -156,7 +156,7 @@ void PortCoreOutputUnit::closeBasic() {
             }
         }
 
-        String msg = String("Removing output from ") +
+        ConstString msg = ConstString("Removing output from ") +
             route.getFromName() + " to " + route.getToName();
 
         if (Name(route.getToName()).isRooted()) {

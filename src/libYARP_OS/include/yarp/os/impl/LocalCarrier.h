@@ -13,6 +13,7 @@
 #include <yarp/os/impl/AbstractCarrier.h>
 #include <yarp/os/impl/SocketTwoWayStream.h>
 #include <yarp/os/Semaphore.h>
+#include <yarp/os/ConstString.h>
 
 
 namespace yarp {
@@ -71,7 +72,7 @@ public:
 
     virtual Carrier *create();
 
-    virtual String getName();
+    virtual yarp::os::ConstString getName();
 
     virtual bool requireAck();
     virtual bool isConnectionless();
@@ -99,7 +100,7 @@ protected:
     LocalCarrier *peer;
     yarp::os::Semaphore peerMutex;
     yarp::os::Semaphore sent, received;
-    String portName;
+    yarp::os::ConstString portName;
 
     static LocalCarrierManager manager;
 };

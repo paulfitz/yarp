@@ -27,7 +27,7 @@ using namespace yarp::os::impl;
 #define RTARGET stderr
 
 
-static ConstString expandUserFileName(const char *fname) {
+static ConstString expandUserFileName(const ConstString& fname) {
     ConstString root = NetworkBase::getEnvironment("YARP_CONF");
     ConstString home = NetworkBase::getEnvironment("HOME");
     ConstString homepath = NetworkBase::getEnvironment("HOMEPATH");
@@ -295,7 +295,7 @@ public:
             }
             ConstString fromPath = extractPath(from.c_str());
             configFilePath = fromPath;
-            config.fromConfigFile(from,false);
+            config.fromConfigFile(from.c_str(),false);
             config.fromCommand(argc,argv,skip,false);
         }
         return true;
@@ -392,14 +392,14 @@ public:
 
     yarp::os::ConstString findPath(Property& config, const char *name) {
         ConstString fname = config.check(name,Value(name)).asString();
-        ConstString result = findFileBase(config,fname,true);
+        ConstString result = findFileBase(config,fname.c_str(),true);
         return result;
     }
 
     yarp::os::Bottle findPaths(Property& config, const char *name) {
         ConstString fname = config.check(name,Value(name)).asString();
         Bottle paths;
-        findFileBase(config,fname,true,paths,false);
+        findFileBase(config,fname.c_str(),true,paths,false);
         return paths;
     }
 
@@ -411,7 +411,7 @@ public:
 
     yarp::os::ConstString findFile(Property& config, const char *name) {
         ConstString fname = config.check(name,Value(name)).asString();
-        ConstString result = findFileBase(config,fname,false);
+        ConstString result = findFileBase(config,fname.c_str(),false);
         return result;
     }
 
@@ -436,7 +436,7 @@ public:
             output.addString(getPwd());
             if (justTop) return;
         }
-        ConstString str = check(getPwd(),"","",name,isDir);
+        ConstString str = check(getPwd().c_str(),"","",name,isDir);
         if (str!="") {
             output.addString(str);
             if (justTop) return;
@@ -452,7 +452,7 @@ public:
 
         // check app dirs
         for (int i=0; i<apps.size(); i++) {
-            str = check(root.c_str(),cap,apps.get(i).asString().c_str(),
+            str = check(root.c_str(),cap.c_str(),apps.get(i).asString().c_str(),
                         name,isDir);
             if (str!="") {
                 output.addString(str);
@@ -462,7 +462,7 @@ public:
 
         // check ROOT/app/default/
         for (int i=0; i<defCaps.size(); i++) {
-            str = check(root.c_str(),cap,defCaps.get(i).asString().c_str(),
+            str = check(root.c_str(),cap.c_str(),defCaps.get(i).asString().c_str(),
                         name,isDir);
             if (str!="") {
                 output.addString(str);
@@ -482,7 +482,7 @@ public:
         Bottle sections = pathd.findGroup("search").tail();
         for (int i=0; i<sections.size(); i++) {
             ConstString search_name = sections.get(i).asString();
-            Bottle group = pathd.findGroup(search_name);
+            Bottle group = pathd.findGroup(search_name.c_str());
             Bottle paths = group.findGroup("path").tail();
             for (int j=0; j<paths.size(); j++) {
                 ConstString str = check(paths.get(j).asString().c_str(),"","",
@@ -552,7 +552,7 @@ public:
     ConstString context2path(Property& config, const ConstString& context ) {
         ConstString cap =
             config.check("capability_directory",Value("app")).asString();
-        ConstString path = getPath(root,cap,context,"");
+        ConstString path = getPath(root.c_str(),cap.c_str(),context.c_str(),"");
         if (path.length()>1) {
             if (path[path.length()-1]=='/') {
                 path = path.substr(0,path.length()-1);
@@ -575,7 +575,7 @@ ResourceFinder::ResourceFinder() {
 ResourceFinder::ResourceFinder(Searchable& data, void *implementation) {
     this->implementation = implementation;
     if (!data.isNull()) {
-        config.fromString(data.toString());
+        config.fromString(data.toString().c_str());
     }
     nullConfig = data.isNull();
     owned = false;

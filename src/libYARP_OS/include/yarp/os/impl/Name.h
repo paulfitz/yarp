@@ -10,7 +10,7 @@
 #ifndef _YARP2_NAME_
 #define _YARP2_NAME_
 
-#include <yarp/os/impl/String.h>
+#include <yarp/os/ConstString.h>
 #include <yarp/os/impl/Address.h>
 
 namespace yarp {
@@ -32,7 +32,7 @@ public:
      *
      * @param txt the port name.
      */
-    Name(const String& txt);
+    Name(const yarp::os::ConstString& txt);
 
     /**
      * Check if port name begins with "/"
@@ -51,10 +51,11 @@ public:
      */
     Address toAddress() const;
 
-    String getCarrierModifier(const char *mod, bool *hasModifier = NULL);
+    yarp::os::ConstString getCarrierModifier(const yarp::os::ConstString& mod, 
+                                             bool *hasModifier = NULL);
 
 private:
-    String txt;
+    yarp::os::ConstString txt;
 };
 
 #endif

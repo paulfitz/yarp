@@ -226,7 +226,7 @@ public:
     }
 
 
-    String toString() {
+    yarp::os::ConstString toString() {
         stopWrite();
         StringOutputStream sos;
         write(sos);

@@ -78,6 +78,8 @@ public:
      * @param isVocab set this to true if the string should be interpreted
      * as a vocabulary identifier
      */
+    Value(const ConstString& str, bool isVocab = false);
+
     Value(const char *str, bool isVocab = false);
 
     /**
@@ -309,7 +311,7 @@ public:
      * @param str the value to take on
      * @return a string Value
      */
-    static Value *makeString(const char *str);
+    static Value *makeString(const ConstString& str);
 
     /**
      * Create a vocabulary identifier Value
@@ -323,7 +325,7 @@ public:
      * @param str the value to take on
      * @return a vocabulary identifier Value
      */
-    static Value *makeVocab(const char *str);
+    static Value *makeVocab(const ConstString& str);
 
 
     /**

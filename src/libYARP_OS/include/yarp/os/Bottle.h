@@ -69,7 +69,7 @@ public:
      *
      * @param text the textual form of the bottle to be interpreted.
      */
-    Bottle(const char *text);
+    Bottle(const ConstString& text);
 
     /**
      * Copy constructor.
@@ -197,7 +197,7 @@ public:
      *
      * @param text the textual form of the bottle to be interpreted.
      */
-    void fromString(const char *text);
+    void fromString(const ConstString& text);
 
     /**
      * Initializes bottle from a binary representation.

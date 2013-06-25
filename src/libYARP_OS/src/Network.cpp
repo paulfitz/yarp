@@ -211,19 +211,19 @@ static int enactConnection(const Contact& src,
 
 */
 
-static int metaConnect(const char *csrc,
-                       const char *cdest,
+static int metaConnect(const ConstString& src,
+                       const ConstString& dest,
                        ContactStyle style,
                        int mode) {
     YARP_SPRINTF3(Logger::get(),debug,
                   "working on connection %s to %s (%s)",
-                  csrc,
-                  cdest,
+                  src.c_str(),
+                  dest.c_str(),
                   (mode==YARP_ENACT_CONNECT)?"connect":((mode==YARP_ENACT_DISCONNECT)?"disconnect":"check")
                   );
 
-    ConstString src = csrc;
-    ConstString dest = cdest;
+    //ConstString src = csrc;
+    //ConstString dest = cdest;
 
     // get the expressed contacts, without name server input
     Contact dynamicSrc = Contact::fromString(src);
@@ -454,41 +454,41 @@ static int metaConnect(const char *csrc,
     return 1;
 }
 
-bool NetworkBase::connect(const char *src, const char *dest,
-                          const char *carrier,
+bool NetworkBase::connect(const ConstString& src, const ConstString& dest,
+                          const ConstString& carrier,
                           bool quiet) {
     ContactStyle style;
     style.quiet = quiet;
-    if (carrier!=NULL) {
+    if (carrier!="") {
         style.carrier = carrier;
     }
     return connect(src,dest,style);
 }
 
-bool NetworkBase::connect(const char *src,
-                          const char *dest,
+bool NetworkBase::connect(const ConstString& src,
+                          const ConstString& dest,
                           const ContactStyle& style) {
     int result = metaConnect(src,dest,style,YARP_ENACT_CONNECT);
     return result == 0;
 }
 
-bool NetworkBase::disconnect(const char *src,
-                             const char *dest,
+bool NetworkBase::disconnect(const ConstString& src, 
+                             const ConstString& dest,
                              bool quiet) {
     ContactStyle style;
     style.quiet = quiet;
     return disconnect(src,dest,style);
 }
 
-bool NetworkBase::disconnect(const char *src,
-                             const char *dest,
+bool NetworkBase::disconnect(const ConstString& src, 
+                             const ConstString& dest,
                              const ContactStyle& style) {
     int result = metaConnect(src,dest,style,YARP_ENACT_DISCONNECT);
     return result == 0;
 }
 
-bool NetworkBase::isConnected(const char *src,
-                              const char *dest,
+bool NetworkBase::isConnected(const ConstString& src, 
+                              const ConstString& dest,
                               bool quiet) {
     ContactStyle style;
     style.quiet = quiet;
@@ -590,17 +590,17 @@ void NetworkBase::finiMinimum() {
     if (__yarp_is_initialized>0) __yarp_is_initialized--;
 }
 
-Contact NetworkBase::queryName(const char *name) {
-    YARP_SPRINTF1(Logger::get(),debug,"query name %s",name);
+Contact NetworkBase::queryName(const ConstString& name) {
+    YARP_SPRINTF1(Logger::get(),debug,"query name %s",name.c_str());
     if (getNameServerName()==name) {
-        YARP_SPRINTF1(Logger::get(),debug,"query recognized as name server: %s",name);
+        YARP_SPRINTF1(Logger::get(),debug,"query recognized as name server: %s",name.c_str());
         return getNameServerContact();
     }
     Contact c = c.fromString(name);
     if (c.isValid()&&c.getPort()>0) {
         return c;
     }
-    return getNameSpace().queryName(name);
+    return getNameSpace().queryName(name.c_str());
 }
 
 
@@ -789,13 +789,14 @@ bool NetworkBase::write(const char *port_name,
     return write(Contact::byName(port_name),cmd,reply);
 }
 
-bool NetworkBase::isConnected(const char *src, const char *dest,
+bool NetworkBase::isConnected(const ConstString& src, 
+                              const ConstString& dest,
                               const ContactStyle& style) {
     int result = metaConnect(src,dest,style,YARP_ENACT_EXISTS);
     if (result!=0) {
         if (!style.quiet) {
             printf("No connection from %s to %s found\n",
-                   src, dest);
+                   src.c_str(), dest.c_str());
         }
     }
     return result == 0;
@@ -916,7 +917,7 @@ public:
         return owner->create();
     }
 
-    virtual String getName() {
+    virtual ConstString getName() {
         return getContent().getName();
     }
 
@@ -1071,8 +1072,8 @@ public:
         settings.setSelector(selector);
         if (plugin.open(settings)) {
             car.open(*plugin.getFactory());
-            settings.setLibraryMethodName(plugin.getFactory()->getName(),
-                                          settings.getMethodName());
+            settings.setLibraryMethodName(plugin.getFactory()->getName().c_str(),
+                                          settings.getMethodName().c_str());
         }
     }
 

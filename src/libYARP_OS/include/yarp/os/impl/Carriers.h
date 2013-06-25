@@ -10,7 +10,7 @@
 #ifndef _YARP2_CARRIERS_
 #define _YARP2_CARRIERS_
 
-#include <yarp/os/impl/String.h>
+#include <yarp/os/ConstString.h>
 #include <yarp/os/Bytes.h>
 #include <yarp/os/impl/Address.h>
 #include <yarp/os/impl/Face.h>
@@ -43,7 +43,7 @@ public:
      * @param name the name of the desired carrier.
      * @return the desired carrier, or NULL if not found.
      */
-    static Carrier *chooseCarrier(const String& name);
+    static Carrier *chooseCarrier(const yarp::os::ConstString& name);
 
     /**
      * Select a carrier by 8-byte header.
@@ -110,7 +110,8 @@ private:
 
     static Carriers *yarp_carriers_instance;
 
-    Carrier *chooseCarrier(const String * name, const Bytes * bytes,
+    Carrier *chooseCarrier(const yarp::os::ConstString *name, 
+                           const Bytes * bytes,
                            bool load_if_needed = true);
 };
 

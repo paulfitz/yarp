@@ -64,7 +64,7 @@ private:
 public:
     NameserCarrier();
 
-    virtual String getName();
+    virtual yarp::os::ConstString getName();
     virtual String getSpecifierName();
 
     virtual Carrier *create();

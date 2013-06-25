@@ -12,7 +12,7 @@
 
 #include <yarp/os/impl/PortCore.h>
 #include <yarp/os/impl/ThreadImpl.h>
-#include <yarp/os/impl/String.h>
+#include <yarp/os/ConstString.h>
 #include <yarp/os/impl/Name.h>
 
 namespace yarp {
@@ -89,7 +89,7 @@ public:
     }
 
     void setMode() {
-        Name name(getRoute().getCarrierName() + String("://test"));
+        Name name(getRoute().getCarrierName() + yarp::os::ConstString("://test"));
         mode = name.getCarrierModifier("log",&hasMode);
     }
 
@@ -97,7 +97,7 @@ public:
         return index;
     }
 
-    String getMode(bool *hasMode = NULL) {
+    yarp::os::ConstString getMode(bool *hasMode = NULL) {
         if (hasMode!=NULL) {
             *hasMode = this->hasMode;
         }
@@ -127,7 +127,7 @@ protected:
 private:
     PortCore& owner;
     bool doomed;
-    String mode;
+    yarp::os::ConstString mode;
     bool hasMode;
     bool pupped;
     int index;

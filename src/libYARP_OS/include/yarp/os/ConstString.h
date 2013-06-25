@@ -12,12 +12,16 @@
 
 #include <yarp/os/api.h>
 
+#include <string>
+
 namespace yarp {
     namespace os {
-        class ConstString;
+        //class ConstString;
+        typedef std::string ConstString;
     }
 }
 
+#if 0
 /**
  * A constant string.  The yarp::os library returns strings in this form,
  * to avoid forcing you to use the same string implementation
@@ -96,6 +100,7 @@ private:
 
     void *implementation;
 };
+#endif
 
 #endif
 

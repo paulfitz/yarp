@@ -18,6 +18,7 @@
 #include <yarp/os/impl/Election.h>
 #include <yarp/os/impl/SplitString.h>
 #include <yarp/os/impl/PlatformSize.h>
+#include <yarp/os/ConstString.h>
 
 #include <stdio.h>
 
@@ -35,8 +36,8 @@ namespace yarp {
 class yarp::os::impl::McastCarrier : public UdpCarrier {
 protected:
     Address mcastAddress;
-    String mcastName;
-    String key;
+    yarp::os::ConstString mcastName;
+    yarp::os::ConstString key;
 
     static ElectionOf<McastCarrier,PeerRecord> *caster;
 
@@ -49,7 +50,7 @@ public:
     virtual ~McastCarrier();
 
     virtual Carrier *create();
-    virtual String getName();
+    virtual yarp::os::ConstString getName();
 
     virtual int getSpecifierCode();
     virtual bool sendHeader(Protocol& proto);
@@ -58,8 +59,8 @@ public:
     virtual bool respondToHeader(Protocol& proto);
     virtual bool expectReplyToHeader(Protocol& proto);
 
-    void addSender(const String& key);
-    void addRemove(const String& key);
+    void addSender(const yarp::os::ConstString& key);
+    void addRemove(const yarp::os::ConstString& key);
     bool isElect();
 
     virtual bool isActive();

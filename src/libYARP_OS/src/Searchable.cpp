@@ -117,7 +117,7 @@ yarp::os::ConstString yarp::os::Searchable::getContext() {
 
 void yarp::os::Searchable::reportToMonitor(const yarp::os::SearchReport& report) {
     if (monitor!=NULL) {
-        monitor->report(report,monitorContext);
+        monitor->report(report,monitorContext.c_str());
     }
 }
 

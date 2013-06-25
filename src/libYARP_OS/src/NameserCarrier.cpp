@@ -94,7 +94,7 @@ yarp::os::impl::NameserCarrier::NameserCarrier() {
     firstSend = true;
 }
 
-yarp::os::impl::String yarp::os::impl::NameserCarrier::getName() {
+yarp::os::ConstString yarp::os::impl::NameserCarrier::getName() {
     return "name_ser";
 }
 

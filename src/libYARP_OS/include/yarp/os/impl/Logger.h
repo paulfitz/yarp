@@ -12,6 +12,7 @@
 
 #include <stdio.h>
 #include <yarp/os/impl/String.h>
+#include <yarp/os/ConstString.h>
 
 #ifdef YARP_HAS_ACE
 #  include <ace/Log_Msg.h>
@@ -84,12 +85,14 @@ public:
     }
 #endif
 
-    void debug(const String& txt) {
-        show(LM_DEBUG,txt);
-    }
-
     void println(const String& txt) {
         debug(txt);
+    }
+
+
+
+    void debug(const String& txt) {
+        show(LM_DEBUG,txt);
     }
 
     void info(const String& txt) {
@@ -106,6 +109,56 @@ public:
 
     void fail(const String& txt) {
         show(LM_ERROR,txt);
+        exit(1);
+    }
+
+
+
+    void debug(const char *txt) {
+        String stxt(txt);
+        show(LM_DEBUG,stxt);
+    }
+
+    void info(const char *txt) {
+        String stxt(txt);
+        show(LM_INFO,stxt);
+    }
+
+    void warning(const char *txt) {
+        String stxt(txt);
+        show(LM_WARNING,stxt);
+    }
+
+    void error(const char *txt) {
+        String stxt(txt);
+        show(LM_ERROR,stxt);
+    }
+
+    void fail(const char *txt) {
+        String stxt(txt);
+        show(LM_ERROR,stxt);
+        exit(1);
+    }
+
+
+    void debug(const yarp::os::ConstString& txt) {
+        show(LM_DEBUG,txt.c_str());
+    }
+
+    void info(const yarp::os::ConstString& txt) {
+        show(LM_INFO,txt.c_str());
+    }
+
+    void warning(const yarp::os::ConstString& txt) {
+        show(LM_WARNING,txt.c_str());
+    }
+
+    void error(const yarp::os::ConstString& txt) {
+        show(LM_ERROR,txt.c_str());
+    }
+
+    void fail(const yarp::os::ConstString& txt) {
+        show(LM_ERROR,txt.c_str());
         exit(1);
     }
 

@@ -10,6 +10,7 @@
 #ifndef _YARP2_NETTYPE_
 #define _YARP2_NETTYPE_
 
+#include <yarp/os/ConstString.h>
 #include <yarp/os/impl/String.h>
 #include <yarp/os/Bytes.h>
 #include <yarp/os/InputStream.h>
@@ -57,8 +58,9 @@ public:
         return true;
     }
 
-    static String readLine(yarp::os::InputStream& is, int terminal = '\n',
-                           bool *success = NULL);
+    static yarp::os::ConstString readLine(yarp::os::InputStream& is, 
+                                          int terminal = '\n',
+                                          bool *success = NULL);
 
     static ssize_t readFull(yarp::os::InputStream& is, const yarp::os::Bytes& b);
 

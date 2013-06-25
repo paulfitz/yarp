@@ -15,7 +15,7 @@
 #include <yarp/os/ConnectionReader.h>
 #include <yarp/os/InputStream.h>
 #include <yarp/os/OutputStream.h>
-#include <yarp/os/impl/String.h>
+#include <yarp/os/ConstString.h>
 #include <yarp/os/Property.h>
 #include <yarp/os/Connection.h>
 
@@ -35,7 +35,7 @@ class YARP_OS_impl_API yarp::os::impl::InputProtocol {
 public:
     virtual ~InputProtocol() {}
 
-    virtual bool open(const String& name) = 0;
+    virtual bool open(const yarp::os::ConstString& name) = 0;
     virtual void close() = 0;
     virtual void interrupt() = 0;
 
@@ -57,7 +57,7 @@ public:
     virtual yarp::os::OutputStream& getOutputStream() = 0;
     virtual yarp::os::InputStream& getInputStream() = 0;
 
-    virtual void setEnvelope(const String& str) = 0;
+    virtual void setEnvelope(const yarp::os::ConstString& str) = 0;
 
     virtual bool setTimeout(double timeout) = 0;
 };

@@ -10,6 +10,7 @@
 #ifndef _YARP2_NAMECONFIG_
 #define _YARP2_NAMECONFIG_
 
+#include <yarp/os/ConstString.h>
 #include <yarp/os/impl/String.h>
 #include <yarp/os/impl/Address.h>
 #include <yarp/os/Bottle.h>
@@ -49,7 +50,7 @@ public:
 
     void setAddress(const Address& address);
 
-    static String getHostName(bool prefer_loopback = false);
+    static yarp::os::ConstString getHostName(bool prefer_loopback = false);
 
     static String getIps();
 

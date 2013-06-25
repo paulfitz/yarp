@@ -184,7 +184,7 @@ bool NameConfig::toFile(bool clean) {
         String txt = "";
         if (!clean) {
             String m = (mode!="")?mode:"yarp";
-            txt += address.getName() + " " + NetType::toString(address.getPort()) + " " + m + "\n";
+            txt  = txt + address.getName().c_str() + " " + NetType::toString(address.getPort()) + " " + m + "\n";
         }
         return writeConfig(fname,txt);
     }
@@ -211,7 +211,7 @@ bool NameConfig::writeConfig(const String& fileName, const String& text) {
 
 
 
-String NameConfig::getHostName(bool prefer_loopback) {
+ConstString NameConfig::getHostName(bool prefer_loopback) {
     // try to pick a good host identifier
 
     ConstString result = "127.0.0.1";
@@ -287,7 +287,7 @@ String NameConfig::getHostName(bool prefer_loopback) {
 #endif
     }
 
-    return result.c_str();
+    return result;
 }
 
 

@@ -11,7 +11,7 @@
 #define _YARP2_STRINGOUTPUTSTREAM_
 
 #include <yarp/os/OutputStream.h>
-#include <yarp/os/impl/String.h>
+#include <yarp/os/ConstString.h>
 
 namespace yarp {
     namespace os {
@@ -31,7 +31,7 @@ public:
     StringOutputStream() { }
 
 
-    String toString() {
+    yarp::os::ConstString toString() {
         return data;
     }
 
@@ -41,12 +41,10 @@ public:
 
 
     virtual void write(const Bytes& b) { // throws
-        String tmp;
-        YARP_STRSET(tmp,(char*)b.get(),b.length(),0);
+        yarp::os::ConstString tmp;
+        //YARP_STRSET(tmp,(char*)b.get(),b.length(),0);
+        tmp = yarp::os::ConstString((char*)b.get(),b.length());
         data += tmp;
-        //for (int i=0; i<b.length(); i++) {
-        //data += b.get()[i];
-        //}
     }
 
     virtual void close() {
@@ -56,10 +54,10 @@ public:
         return true;
     }
 
-    const String& str() { return data; }
+    const yarp::os::ConstString& str() { return data; }
 
 private:
-    String data;
+    yarp::os::ConstString data;
 };
 
 #endif

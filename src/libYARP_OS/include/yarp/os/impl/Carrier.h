@@ -10,6 +10,7 @@
 #ifndef _YARP2_CARRIER_
 #define _YARP2_CARRIER_
 
+#include <yarp/os/impl/String.h>
 #include <yarp/os/impl/ShiftStream.h>
 #include <yarp/os/impl/SizedWriter.h>
 #include <yarp/os/Bytes.h>
@@ -63,7 +64,7 @@ public:
      *
      * @return the name of this carrier
      */
-    virtual String getName() = 0;
+    virtual yarp::os::ConstString getName() = 0;
 
     /**
      * Given the first 8 bytes received on a connection, decide if

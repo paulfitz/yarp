@@ -46,7 +46,7 @@ public:
 
 class PropertyHelper {
 public:
-    PLATFORM_MAP(YARP_KEYED_STRING,PropertyItem) data;
+    PLATFORM_MAP(ConstString,PropertyItem) data;
     Property& owner;
 
     PropertyHelper(Property& owner, int hash_size) :
@@ -55,10 +55,9 @@ public:
 #endif
         owner(owner) {}
 
-    PropertyItem *getPropNoCreate(const char *key) const {
-        String n(key);
-        PLATFORM_MAP_ITERATOR(YARP_KEYED_STRING,PropertyItem,entry);
-        int result = PLATFORM_MAP_FIND((*((PLATFORM_MAP(YARP_KEYED_STRING,PropertyItem) *)&data)),n,entry);
+    PropertyItem *getPropNoCreate(const ConstString& n) const {
+        PLATFORM_MAP_ITERATOR(ConstString,PropertyItem,entry);
+        int result = PLATFORM_MAP_FIND((*((PLATFORM_MAP(ConstString,PropertyItem) *)&data)),n,entry);
         if (result==-1) {
             return NULL;
         }
@@ -67,9 +66,8 @@ public:
         return &(PLATFORM_MAP_ITERATOR_SECOND(entry));
     }
 
-    PropertyItem *getProp(const char *key, bool create = true) {
-        String n(key);
-        PLATFORM_MAP_ITERATOR(YARP_KEYED_STRING,PropertyItem,entry);
+    PropertyItem *getProp(const ConstString& n, bool create = true) {
+        PLATFORM_MAP_ITERATOR(ConstString,PropertyItem,entry);
         int result = PLATFORM_MAP_FIND(data,n,entry);
         if (result==-1) {
             if (!create) {
@@ -83,7 +81,7 @@ public:
         return &(PLATFORM_MAP_ITERATOR_SECOND(entry));
     }
 
-    void put(const char *key, const char *val) {
+    void put(const ConstString& key, const char *val) {
         PropertyItem *p = getProp(key,true);
         p->singleton = true;
         p->bot.clear();
@@ -91,7 +89,7 @@ public:
         p->bot.addString(val);
     }
 
-    void put(const char *key, const ConstString& val) {
+    void put(const ConstString& key, const ConstString& val) {
         PropertyItem *p = getProp(key,true);
         p->singleton = true;
         p->bot.clear();
@@ -99,7 +97,7 @@ public:
         p->bot.addString(val);
     }
 
-    void put(const char *key, const Value& bit) {
+    void put(const ConstString& key, const Value& bit) {
         PropertyItem *p = getProp(key,true);
         p->singleton = true;
         p->bot.clear();
@@ -107,7 +105,7 @@ public:
         p->bot.add(bit);
     }
 
-    void put(const char *key, Value *bit) {
+    void put(const ConstString& key, Value *bit) {
         PropertyItem *p = getProp(key,true);
         p->singleton = true;
         p->bot.clear();
@@ -121,8 +119,8 @@ public:
         return p!=NULL;
     }
 
-    void unput(const char *key) {
-        PLATFORM_MAP_UNSET(data,String(key));
+    void unput(const ConstString& key) {
+        PLATFORM_MAP_UNSET(data,key);
     }
 
     bool check(const char *key) const {
@@ -171,7 +169,7 @@ public:
         PropertyItem *p = getProp(key,true);
         p->singleton = false;
         // inefficient! copy not implemented yet...
-        p->bot.fromString(val.toString().c_str());
+        p->bot.fromString(val.toString());
         return p->bot;
     }
 
@@ -184,7 +182,7 @@ public:
     }
 
 
-    Bottle *getBottle(const char *key) const {
+    Bottle *getBottle(const ConstString& key) const {
         PropertyItem *p = getPropNoCreate(key);
         if (p!=NULL) {
             return &(p->bot);
@@ -196,7 +194,7 @@ public:
         PLATFORM_MAP_CLEAR(data);
     }
 
-    void fromString(const char *txt,bool wipe=true) {
+    void fromString(const ConstString& txt,bool wipe=true) {
         Bottle bot;
         bot.fromString(txt);
         fromBottle(bot,wipe);
@@ -297,7 +295,7 @@ public:
             if (len<4) continue;
             if (name.substr(len-4)!=".ini") continue;
             ConstString fname = ConstString(dirname) + "/" + name;
-            ok = ok && readFile(fname,result,false);
+            ok = ok && readFile(fname.c_str(),result,false);
             result += "\n[]\n";  // reset any nested sections
         }
         YARP_closedir(dir);
@@ -396,13 +394,13 @@ public:
         if (wipe) {
             clear();
         }
-        String tag = "";
+        ConstString tag = "";
         Bottle accum;
         bool done = false;
         do {
             bool isTag = false;
             bool including = false;
-            String buf;
+            ConstString buf;
             bool good = true;
             buf = NetType::readLine(sis,'\n',&good);
             while (good && !BottleImpl::isComplete(buf.c_str())) {
@@ -414,7 +412,7 @@ public:
             if (!done) {
                 including = false;
 
-                if (YARP_STRSTR(buf,"//")!=String::npos) {
+                if (buf.find("//")!=ConstString::npos) {
                     bool quoted = false;
                     int comment = 0;
                     for (unsigned int i=0; i<buf.length(); i++) {
@@ -441,11 +439,11 @@ public:
                 buf = expand(buf.c_str(),env,owner).c_str();
 
                 if (buf[0]=='[') {
-                    YARP_STRING_INDEX stop = YARP_STRSTR(buf,"]");
-                    if (stop!=String::npos) {
+                    size_t stop = buf.find("]");
+                    if (stop!=ConstString::npos) {
                         buf = buf.substr(1,stop-1);
-                        YARP_STRING_INDEX space = YARP_STRSTR(buf," ");
-                        if (space!=String::npos) {
+                        size_t space = buf.find(" ");
+                        if (space!=ConstString::npos) {
                             Bottle bot(buf.c_str());
                             if (bot.size()>1) {
                                 if (bot.get(0).toString() == "include") {
@@ -503,7 +501,7 @@ public:
                                         if (tag!="") {
                                             if (accum.size()>=1) {
                                                 Bottle b;
-                                                b.addString(tag.c_str());
+                                                b.addString(tag);
                                                 //Bottle& subList = b.addList();
                                                 //subList.copy(accum);
                                                 b.append(accum);
@@ -544,7 +542,7 @@ public:
             }
             if (!isTag && !including) {
                 Bottle bot;
-                bot.fromString(buf.c_str());
+                bot.fromString(buf);
                 if (bot.size()>=1) {
                     if (tag=="") {
                         putBottleCompat(bot.get(0).toString().c_str(),bot);
@@ -599,7 +597,7 @@ public:
 
     ConstString toString() {
         Bottle bot;
-        for (PLATFORM_MAP(YARP_KEYED_STRING,PropertyItem)::iterator
+        for (PLATFORM_MAP(ConstString,PropertyItem)::iterator
                  it = data.begin(); it!=data.end(); it++) {
             PropertyItem& rec = PLATFORM_MAP_ITERATOR_SECOND(it);
             Bottle& sub = bot.addList();
@@ -722,7 +720,7 @@ Property::Property(int hash_size) {
 }
 
 
-Property::Property(const char *str) {
+Property::Property(const ConstString& str) {
     implementation = new PropertyHelper(*this,0);
     YARP_ASSERT(implementation!=NULL);
     fromString(str);
@@ -750,28 +748,28 @@ const Property& Property::operator = (const Property& prop) {
 }
 
 
-void Property::put(const char *key, const char *val) {
+void Property::put(const ConstString& key, const char *val) {
     HELPER(implementation).put(key,val);
 }
 
-void Property::put(const char *key, const ConstString& val) {
+void Property::put(const ConstString& key, const ConstString& val) {
     HELPER(implementation).put(key,val);
 }
 
-void Property::put(const char *key, const Value& value) {
+void Property::put(const ConstString& key, const Value& value) {
     HELPER(implementation).put(key,value);
 }
 
 
-void Property::put(const char *key, Value *value) {
+void Property::put(const ConstString& key, Value *value) {
     HELPER(implementation).put(key,value);
 }
 
-void Property::put(const char *key, int v) {
+void Property::put(const ConstString& key, int v) {
     put(key,Value::makeInt(v));
 }
 
-void Property::put(const char *key, double v) {
+void Property::put(const ConstString& key, double v) {
     put(key,Value::makeDouble(v));
 }
 
@@ -791,7 +789,7 @@ bool Property::check(const char *key) {
 }
 
 
-void Property::unput(const char *key) {
+void Property::unput(const ConstString& key) {
     HELPER(implementation).unput(key);
 }
 
@@ -801,26 +799,12 @@ Value& Property::find(const char *key) {
 }
 
 
-/*
-Bottle& Property::putBottle(const char *key, const Bottle& val) {
-    return HELPER(implementation).putBottle(key,val);
-}
-
-Bottle& Property::putBottle(const char *key) {
-    return HELPER(implementation).putBottle(key);
-}
-
-Bottle *Property::getBottle(const char *key) const {
-    return HELPER(implementation).getBottle(key);
-}
-*/
-
 void Property::clear() {
     HELPER(implementation).clear();
 }
 
 
-void Property::fromString(const char *txt,bool wipe) {
+void Property::fromString(const ConstString& txt,bool wipe) {
     HELPER(implementation).fromString(txt,wipe);
 }
 

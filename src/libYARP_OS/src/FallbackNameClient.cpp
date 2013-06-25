@@ -38,13 +38,13 @@ void FallbackNameClient::run() {
     send.endPacket();
     for (int i=0; i<5; i++) {
         listen.beginPacket();
-        String txt = NetType::readLine(listen);
+        ConstString txt = NetType::readLine(listen);
         listen.endPacket();
         if (closed) return;
-        YARP_DEBUG(Logger::get(),String("Fallback name client got ") + txt);
-        if (YARP_STRSTR(txt,"registration ")==0) {
+        YARP_DEBUG(Logger::get(),ConstString("Fallback name client got ") + txt);
+        if (txt.find("registration ")==0) {
             address = NameClient::extractAddress(txt);
-            YARP_INFO(Logger::get(),String("Received address ") + 
+            YARP_INFO(Logger::get(),ConstString("Received address ") + 
                       address.toString());
             return;
         }

@@ -11,6 +11,8 @@
 #define _YARP2_NAMECLIENT_
 
 #include <yarp/os/impl/Address.h>
+#include <yarp/os/ConstString.h>
+#include <yarp/os/impl/String.h>
 #include <yarp/os/Bottle.h>
 #include <yarp/os/Contact.h>
 #include <yarp/os/NameStore.h>
@@ -119,7 +121,7 @@ public:
      * in a non-valid address.
      */
     Address probe(const String& cmd) {
-        String result = send(cmd);
+        yarp::os::ConstString result = send(cmd).c_str();
         return extractAddress(result);
     }
 
@@ -130,7 +132,7 @@ public:
      *
      * @return the address corresponding to the text representation
      */
-    static Address extractAddress(const String& txt);
+    static Address extractAddress(const yarp::os::ConstString& txt);
 
     static Address extractAddress(const Bottle& bot);
 

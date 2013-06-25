@@ -34,12 +34,12 @@ void Protocol::setRoute(const Route& route) {
     // First, make sure route is canonicalized.
     // If there are qualifiers in the source name, propagate them
     // to the carrier.
-    String from = r.getFromName();
-    String carrier = r.getCarrierName();
-    if (YARP_STRSTR(from," ")!=String::npos) {
+    ConstString from = r.getFromName();
+    ConstString carrier = r.getCarrierName();
+    if (from.find(" ")!=ConstString::npos) {
         Bottle b(from.c_str());
         if (b.size()>1) {
-            r = r.addFromName(b.get(0).toString().c_str());
+            r = r.addFromName(b.get(0).toString());
             for (int i=1; i<b.size(); i++) {
                 Value& v = b.get(i);
                 Bottle *lst = v.asList();
@@ -65,15 +65,15 @@ void Protocol::setRoute(const Route& route) {
 }
 
 
-String Protocol::getSenderSpecifier() {
+ConstString Protocol::getSenderSpecifier() {
     Route r = getRoute();
-    String from = r.getFromName();
-    String carrier = r.getCarrierName();
-    YARP_STRING_INDEX start = YARP_STRSTR(carrier,"+");
-    if (start!=String::npos) {
+    ConstString from = r.getFromName();
+    ConstString carrier = r.getCarrierName();
+    size_t start = carrier.find("+");
+    if (start!=ConstString::npos) {
         from += " (";
-        for (YARP_STRING_INDEX i=start+1; 
-             i<(YARP_STRING_INDEX)carrier.length(); 
+        for (size_t i=start+1; 
+             i<(size_t)carrier.length(); 
              i++) {
             char ch = carrier[i];
             if (ch=='+') {
@@ -95,7 +95,7 @@ bool Protocol::getRecvDelegate() {
     if (!need_recv_delegate) return true;
     Bottle b(getSenderSpecifier().c_str());
     ConstString tag = b.find("recv").asString();
-    recv_delegate = Carriers::chooseCarrier(String(tag.c_str()));
+    recv_delegate = Carriers::chooseCarrier(tag);
     if (!recv_delegate) {
         fprintf(stderr,"Need carrier \"%s\", but cannot find it.\n",
                 tag.c_str());

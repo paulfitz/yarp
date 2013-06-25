@@ -62,8 +62,8 @@ public:
      * @param quiet suppress messages displayed upon success/failure
      * @return true on success, false on failure
      */
-    static bool connect(const char *src, const char *dest,
-                        const char *carrier = NULL,
+    static bool connect(const ConstString& src, const ConstString& dest,
+                        const ConstString& carrier = "",
                         bool quiet = true);
 
     /**
@@ -73,7 +73,7 @@ public:
      * @param style options for connection
      * @return true on success, false on failure
      */
-    static bool connect(const char *src, const char *dest,
+    static bool connect(const ConstString& src, const ConstString& dest,
                         const ContactStyle& style);
 
     /**
@@ -83,7 +83,7 @@ public:
      * @param quiet suppress messages displayed upon success/failure
      * @return true on success, false on failure
      */
-    static bool disconnect(const char *src, const char *dest,
+    static bool disconnect(const ConstString& src, const ConstString& dest,
                            bool quiet = true);
 
     /**
@@ -93,7 +93,7 @@ public:
      * @param style options for network communication related to disconnection
      * @return true on success, false on failure
      */
-    static bool disconnect(const char *src, const char *dest,
+    static bool disconnect(const ConstString& src, const ConstString& dest,
                            const ContactStyle& style);
 
     /**
@@ -103,7 +103,7 @@ public:
      * @param quiet suppress messages displayed upon success/failure
      * @return true if there is a connection
      */
-    static bool isConnected(const char *src, const char *dest,
+    static bool isConnected(const ConstString& src, const ConstString& dest,
                             bool quiet = true);
 
     /**
@@ -113,7 +113,7 @@ public:
      * @param style options for network communication
      * @return true if there is a connection
      */
-    static bool isConnected(const char *src, const char *dest,
+    static bool isConnected(const ConstString& src, const ConstString& dest,
                             const ContactStyle& style);
 
     /**
@@ -180,7 +180,7 @@ public:
      * known about the name, the returned contact is invalid
      * (Contact::isValid returns false)
      */
-    static Contact queryName(const char *name);
+    static Contact queryName(const ConstString& name);
 
     /**
      * Register a name with the name server.

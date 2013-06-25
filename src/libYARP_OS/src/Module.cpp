@@ -285,7 +285,7 @@ bool Module::basicRespond(const Bottle& command, Bottle& reply) {
         return true;
         break;
     case VOCAB3('g','e','t'):
-        reply.add(state.check(command.get(1).toString(),Value(0)));
+        reply.add(state.check(command.get(1).toString().c_str(),Value(0)));
         return true;
         break;
     case VOCAB4('q','u','i','t'):
@@ -400,7 +400,7 @@ bool Module::openFromCommand(int argc, char *argv[], bool skipFirst) {
         ConstString fname = val->toString();
         options.unput("file");
         ACE_OS::printf("Working with config file %s\n", fname.c_str());
-        options.fromConfigFile(fname,false);
+        options.fromConfigFile(fname.c_str(),false);
 
         // interpret command line options as a set of flags again
         // (just in case we need to override something)
@@ -412,7 +412,7 @@ bool Module::openFromCommand(int argc, char *argv[], bool skipFirst) {
     // check if we want to use nested options (less ambiguous)
     if (options.check("nested",val)||options.check("lispy",val)) {
         ConstString lispy = val->toString();
-        options.fromString(lispy);
+        options.fromString(lispy.c_str());
     }
     options.setMonitor(&HELPER(implementation));
 

@@ -31,7 +31,7 @@ public:
 
     virtual Carrier *create() = 0;
 
-    virtual String getName() = 0;
+    virtual yarp::os::ConstString getName() = 0;
 
     virtual bool checkHeader(const yarp::os::Bytes &header);
     virtual void getHeader(const yarp::os::Bytes &header);

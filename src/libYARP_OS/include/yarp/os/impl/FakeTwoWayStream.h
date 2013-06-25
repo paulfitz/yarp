@@ -67,15 +67,15 @@ public:
         }
     }
 
-    void addInputText(const String& str) {
+    void addInputText(const yarp::os::ConstString& str) {
         in.add(str.c_str());
     }
 
-    String getOutputText() {
+    yarp::os::ConstString getOutputText() {
         return out.toString();
     }
 
-    String getInputText() {
+    yarp::os::ConstString getInputText() {
         return in.toString();
     }
 

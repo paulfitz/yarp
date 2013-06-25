@@ -16,6 +16,7 @@
 using namespace yarp::os::impl;
 using namespace yarp::os;
 
+#if 0
 
 // implementation is a String
 #define HELPER(x) (*((String*)(x)))
@@ -137,3 +138,4 @@ ConstString ConstString::toString(int x) {
     return ConstString(NetType::toString(x).c_str());
 }
 
+#endif

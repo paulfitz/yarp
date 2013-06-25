@@ -67,28 +67,28 @@ Contact Contact::invalid() {
 }
 
 
-Contact Contact::byName(const char *name) {
+Contact Contact::byName(const ConstString& name) {
     Contact result;
     HELPER(result.implementation) = Address().addRegName(name);
     return result;
 }
 
 
-Contact Contact::byCarrier(const char *carrier) {
+Contact Contact::byCarrier(const ConstString& carrier) {
     Contact result;
     HELPER(result.implementation) = Address("",0,carrier);
     return result;
 }
 
-Contact Contact::addCarrier(const char *carrier) const {
+Contact Contact::addCarrier(const ConstString& carrier) const {
     Contact result;
     HELPER(result.implementation) = HELPER(implementation).addCarrier(carrier);
     return result;
 }
 
 
-Contact Contact::bySocket(const char *carrier, 
-                          const char *machineName,
+Contact Contact::bySocket(const ConstString& carrier, 
+                          const ConstString& machineName,
                           int portNumber) {
     Contact result;
     HELPER(result.implementation) = Address(machineName,portNumber,carrier);
@@ -96,8 +96,8 @@ Contact Contact::bySocket(const char *carrier,
 }
 
 
-Contact Contact::addSocket(const char *carrier, 
-                           const char *machineName,
+Contact Contact::addSocket(const ConstString& carrier, 
+                           const ConstString& machineName,
                            int portNumber) const {
     Contact result;
     HELPER(result.implementation) = HELPER(implementation).addSocket(carrier,
@@ -106,7 +106,7 @@ Contact Contact::addSocket(const char *carrier,
     return result;
 }
 
-Contact Contact::addName(const char *name) const {
+Contact Contact::addName(const ConstString& name) const {
     Contact result;
     HELPER(result.implementation) = HELPER(implementation).addRegName(name);
     return result;
@@ -115,15 +115,15 @@ Contact Contact::addName(const char *name) const {
 
 ConstString Contact::getName() const {
     Address& addr = HELPER(implementation);
-    String name = addr.getRegName();
+    ConstString name = addr.getRegName();
     if (name == "") {
-        String host = addr.getName();
+        ConstString host = addr.getName();
         if (host!="") {
-            name = String("/") + host + ":" + 
-                NetType::toString(addr.getPort());
+            name = ConstString("/") + host + ":" + 
+                NetType::toString(addr.getPort()).c_str();
         }
     }
-    return name.c_str();
+    return name;
 }
 
 
@@ -152,8 +152,7 @@ ConstString Contact::toString() const {
 }
 
 
-Contact Contact::fromString(const char *txt) {
-    ConstString str(txt);
+Contact Contact::fromString(const ConstString& str) {
     Contact c;
     ConstString::size_type start = 0;
     ConstString::size_type base = str.find("://");
@@ -237,9 +236,9 @@ Contact Contact::byConfig(Searchable& config) {
     Contact result;
     Address& addr = HELPER(result.implementation);
     int port = config.check("port_number",Value(-1)).asInt();
-    String name = config.check("ip",Value("")).asString().c_str();
-    String regName = config.check("name",Value("")).asString().c_str();
-    String carrier = config.check("carrier",Value("tcp")).asString().c_str();
+    ConstString name = config.check("ip",Value("")).asString();
+    ConstString regName = config.check("name",Value("")).asString();
+    ConstString carrier = config.check("carrier",Value("tcp")).asString();
     addr = Address(name,port,carrier,regName);
     return result;
 }

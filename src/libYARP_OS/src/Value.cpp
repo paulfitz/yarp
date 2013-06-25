@@ -41,6 +41,17 @@ Value::Value(double x) :
     setProxy(makeDouble(x));
 }
 
+Value::Value(const ConstString& str, bool isVocab) :
+        Portable(),
+        Searchable(),
+        proxy(NULL) {
+    if (!isVocab) {
+        setProxy(makeString(str));
+    } else {
+        setProxy(makeVocab(str));
+    }
+}
+
 Value::Value(const char *str, bool isVocab) :
         Portable(),
         Searchable(),
@@ -296,8 +307,8 @@ Value *Value::makeDouble(double x) {
 }
 
 
-Value *Value::makeString(const char *str) {
-    return new StoreString(str);
+Value *Value::makeString(const ConstString& str) {
+    return new StoreString(str.c_str());
 }
 
 
@@ -306,8 +317,8 @@ Value *Value::makeVocab(int v) {
 }
 
 
-Value *Value::makeVocab(const char *str) {
-    return new StoreVocab(Vocab::encode(str));
+Value *Value::makeVocab(const ConstString& str) {
+    return new StoreVocab(Vocab::encode(str.c_str()));
 }
 
 

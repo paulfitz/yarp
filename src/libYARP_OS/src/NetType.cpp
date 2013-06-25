@@ -15,7 +15,7 @@ using namespace yarp::os;
 
 // slow implementation - only relevant for textmode operation
 
-String NetType::readLine(InputStream& is, int terminal, bool *success) {
+ConstString NetType::readLine(InputStream& is, int terminal, bool *success) {
     String buf("");
     bool done = false;
     int esc = 0;
@@ -55,7 +55,7 @@ String NetType::readLine(InputStream& is, int terminal, bool *success) {
             return "";
         }
     }
-    return buf;
+    return buf.c_str();
 }    
 
 ssize_t NetType::readFull(InputStream& is, const Bytes& b) {

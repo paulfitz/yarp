@@ -121,7 +121,7 @@ public:
     }
 
 
-    virtual bool open(const String& name) {
+    virtual bool open(const yarp::os::ConstString& name) {
         if (name=="") {
             setCarrier("text");
             if (delegate!=NULL) {
@@ -153,7 +153,7 @@ public:
             PortReader *reply = writer.getReplyHandler();
             if (reply!=NULL) {
                 if (!delegate->supportReply()) {
-                    YARP_INFO(log,String("connection ") + getRoute().toString() + " does not support replies (try \"tcp\" or \"text_ack\")");
+                    YARP_INFO(log,ConstString("connection ") + getRoute().toString() + " does not support replies (try \"tcp\" or \"text_ack\")");
                 }
                 reader.reset(is(),&getStreams(), getRoute(),
                              messageLen,delegate->isTextMode());
@@ -214,7 +214,7 @@ public:
         this->ref = ref;
     }
 
-    String getSenderSpecifier();
+    yarp::os::ConstString getSenderSpecifier();
 
     virtual bool setTimeout(double timeout) {
         bool ok = os().setWriteTimeout(timeout);
@@ -222,8 +222,8 @@ public:
         return is().setReadTimeout(timeout);
     }
 
-    virtual void setEnvelope(const String& str) {
-        envelope = str;
+    virtual void setEnvelope(const yarp::os::ConstString& str) {
+        envelope = str.c_str();
     }
 
     const String& getEnvelope() {
@@ -289,7 +289,7 @@ private:
             YARP_DEBUG(log,"unrecognized protocol");
             return false;
         }
-        setRoute(getRoute().addCarrierName(delegate->getName()));
+        setRoute(getRoute().addCarrierName(delegate->getName().c_str()));
         delegate->setParameters(header);
         return true;
     }
@@ -311,7 +311,7 @@ private:
         return ok;
     }
 
-    void setCarrier(const String& carrierName) {
+    void setCarrier(const yarp::os::ConstString& carrierName) {
         setRoute(getRoute().addCarrierName(carrierName));
         if (delegate==NULL) {
             delegate = Carriers::chooseCarrier(carrierName);

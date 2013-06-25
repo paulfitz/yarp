@@ -55,7 +55,7 @@ public:
     /**
      * Initialize from a string, using fromString().
      */
-    Property(const char *str);
+    Property(const ConstString& str);
 
 
     /**
@@ -82,7 +82,7 @@ public:
      * @param key the key
      * @param value the string value
      */
-    void put(const char *key, const char *value);
+    void put(const ConstString& key, const char *value);
 
     /**
      * Associate the given key with the given string, so that
@@ -90,7 +90,7 @@ public:
      * @param key the key
      * @param value the string value
      */
-    void put(const char *key, const ConstString& value);
+    void put(const ConstString& key, const ConstString& value);
 
     /**
      * Associate the given key with the given value, so that
@@ -98,7 +98,7 @@ public:
      * @param key the key
      * @param value the value
      */
-    void put(const char *key, const Value& value);
+    void put(const ConstString& key, const Value& value);
 
     /**
      * Associate the given key with the given value, so that
@@ -107,7 +107,7 @@ public:
      * @param key the key
      * @param value the value
      */
-    void put(const char *key, Value *value);
+    void put(const ConstString& key, Value *value);
 
     /**
      * Associate the given key with the given integer, so that
@@ -115,7 +115,7 @@ public:
      * @param key the key
      * @param v the integer value
      */
-    void put(const char *key, int v);
+    void put(const ConstString& key, int v);
 
     /**
      * Associate the given key with the given floating point number, so that
@@ -123,14 +123,14 @@ public:
      * @param key the key
      * @param v the floating point value
      */
-    void put(const char *key, double v);
+    void put(const ConstString& key, double v);
 
     /**
      * Remove the association from the given key to a value, if present.
      * Guarantees that find(key).isNull() will be true.
      * @param key the key
      */
-    void unput(const char *key);
+    void unput(const ConstString& key);
 
     // documented in Searchable
     virtual Value& find(const char *key);
@@ -157,7 +157,7 @@ public:
      * @param txt the textual form of the Property object
      * @param wipe should Property be emptied first
      */
-    void fromString(const char *txt, bool wipe=true);
+    void fromString(const ConstString& txt, bool wipe=true);
 
     /**
      * Interprets a list of command arguments as a list of properties.

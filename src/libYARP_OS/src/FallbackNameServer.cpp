@@ -36,7 +36,7 @@ void FallbackNameServer::run() {
         YARP_DEBUG(Logger::get(),"Fallback server waiting");
         String msg;
         listen.beginPacket();
-        msg = NetType::readLine(listen);
+        msg = NetType::readLine(listen).c_str();
         listen.endPacket();
         YARP_DEBUG(Logger::get(),"Fallback server got something");
         if (listen.isOk()&&!closed) {

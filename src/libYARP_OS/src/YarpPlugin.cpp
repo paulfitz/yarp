@@ -163,13 +163,13 @@ void YarpPluginSelector::scan() {
         }
         rf.setQuiet(true);
         ConstString target = "etc/yarp/plugins";
-        ConstString found = rf.findFile(target);
+        ConstString found = rf.findFile(target.c_str());
         if (found=="") {
             target = "yarp/plugins";
-            found = rf.findFile(target);
+            found = rf.findFile(target.c_str());
             if (found == "") {
                 target = "plugins";
-                found = rf.findFile(target);
+                found = rf.findFile(target.c_str());
             }
         }
         if (found!="") {
@@ -178,7 +178,7 @@ void YarpPluginSelector::scan() {
             YARP_SPRINTF0(Logger::get(),
                           debug,
                           "Loading configuration files related to plugins.");
-            config.fromConfigFile(target);
+            config.fromConfigFile(target.c_str());
         } else {
             YARP_SPRINTF0(Logger::get(),
                           debug,
@@ -191,7 +191,7 @@ void YarpPluginSelector::scan() {
     Bottle lst = config.findGroup("plugin").tail();
     for (int i=0; i<lst.size(); i++) {
         ConstString plugin_name = lst.get(i).asString();
-        Bottle group = config.findGroup(plugin_name);
+        Bottle group = config.findGroup(plugin_name.c_str());
         if (select(group)) {
             plugins.addList() = group;
         }
@@ -199,7 +199,7 @@ void YarpPluginSelector::scan() {
     lst = config.findGroup("search").tail();
     for (int i=0; i<lst.size(); i++) {
         ConstString search_name = lst.get(i).asString();
-        Bottle group = config.findGroup(search_name);
+        Bottle group = config.findGroup(search_name.c_str());
         search_path.addList() = group;
     }
 }

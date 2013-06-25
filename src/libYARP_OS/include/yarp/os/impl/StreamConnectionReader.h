@@ -155,7 +155,7 @@ public:
         if (!isGood()) { return ""; }
         YARP_ASSERT(in!=NULL);
         bool success = false;
-        String result = NetType::readLine(*in,'\n',&success);
+        String result = NetType::readLine(*in,'\n',&success).c_str();
         if (!success) {
             err = true;
             return "";
@@ -222,11 +222,12 @@ public:
         if (!isGood()) { return ""; }
         YARP_ASSERT(in!=NULL);
         bool lsuccess = false;
-        String result = NetType::readLine(*in,terminatingChar,&lsuccess);
+        yarp::os::ConstString result = 
+            NetType::readLine(*in,terminatingChar,&lsuccess);
         if (lsuccess) {
             messageLen -= result.length()+1;
         }
-        return ::yarp::os::ConstString(result.c_str());
+        return result;
     }
 
     virtual bool isValid() {

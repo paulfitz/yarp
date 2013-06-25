@@ -11,7 +11,7 @@
 #define _YARP2_STRINGINPUTSTREAM_
 
 #include <yarp/os/InputStream.h>
-#include <yarp/os/impl/String.h>
+#include <yarp/os/ConstString.h>
 
 namespace yarp {
     namespace os {
@@ -22,7 +22,7 @@ namespace yarp {
 }
 
 /**
- * An InputStream that reads from String.  For testing purposes.
+ * An InputStream that reads from ConstString.  For testing purposes.
  */
 class yarp::os::impl::StringInputStream : public yarp::os::InputStream {
 public:
@@ -38,7 +38,7 @@ public:
         data = "";
     }
 
-    void reset(const String& str) {
+    void reset(const yarp::os::ConstString& str) {
         at = 0;
         data = str;
     }
@@ -47,7 +47,7 @@ public:
         data += txt;
     }
 
-    void add(const String& txt) {
+    void add(const yarp::os::ConstString& txt) {
         data += txt;
     }
 
@@ -74,7 +74,7 @@ public:
     virtual void close() {
     }
 
-    virtual String toString() {
+    virtual ConstString toString() {
         return data;
     }
 
@@ -83,7 +83,7 @@ public:
     }
 
 private:
-    String data;
+    yarp::os::ConstString data;
     unsigned int at;
 };
 

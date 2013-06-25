@@ -48,7 +48,7 @@ const Bottle& Bottle::operator = (const Bottle& bottle) {
 }
 
 
-Bottle::Bottle(const char *text) {
+Bottle::Bottle(const ConstString& text) {
     implementation = new BottleImpl;
     invalid = false;
     YARP_ASSERT(implementation!=NULL);
@@ -140,9 +140,9 @@ bool Bottle::isList(int index) {
     return HELPER(implementation).isList(index);
 }
 
-void Bottle::fromString(const char *text) {
+void Bottle::fromString(const ConstString& text) {
     invalid = false;
-    HELPER(implementation).fromString(text);
+    HELPER(implementation).fromString(text.c_str());
 }
 
 ConstString Bottle::toString() const {

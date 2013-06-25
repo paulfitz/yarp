@@ -103,7 +103,7 @@ public:
 
 
 
-Address NameClient::extractAddress(const String& txt) {
+Address NameClient::extractAddress(const ConstString& txt) {
     Address result;
     Params p(txt.c_str());
     if (p.size()>=9) {
@@ -154,7 +154,7 @@ String NameClient::send(const String& cmd, bool multi) {
         }
         
         TcpFace face;
-        YARP_DEBUG(Logger::get(),String("connecting to ") + getAddress().toString());
+        YARP_DEBUG(Logger::get(),ConstString("connecting to ") + getAddress().toString());
         OutputProtocol *ip = NULL;
         if (!retry) {
             ip = face.write(server);
@@ -204,10 +204,9 @@ String NameClient::send(const String& cmd, bool multi) {
         bool more = multi;
         while (more) {
             String line = "";
-            line = NetType::readLine(ip->getInputStream());
+            line = NetType::readLine(ip->getInputStream()).c_str();
             if (!(ip->checkStreams())) {
                 more = false;
-                //YARP_DEBUG(Logger::get(), e.toString() + " <<< exception from name server");
                 retry = true;
                 break;
             }
@@ -315,7 +314,7 @@ Address NameClient::registerName(const String& name, const Address& suggest) {
 
     Address address = extractAddress(reply);
     if (address.isValid()) {
-        String reg = address.getRegName();
+        ConstString reg = address.getRegName();
 
         /*
 
@@ -332,14 +331,14 @@ Address NameClient::registerName(const String& name, const Address& suggest) {
 
         cmd.clear();
         cmd.addString("set");
-        cmd.addString(reg.c_str());
+        cmd.addString(reg);
         cmd.addString("ips");
         cmd.append(NameConfig::getIpsAsBottle());
         send(cmd,reply);
 
         cmd.clear();
         cmd.addString("set");
-        cmd.addString(reg.c_str());
+        cmd.addString(reg);
         cmd.addString("process");
         cmd.addInt(ACE_OS::getpid());
         send(cmd,reply);
@@ -416,7 +415,7 @@ void NameClient::setup() {
             YARP_ERROR(Logger::get(),"Cannot find name server");
         }
         
-        YARP_DEBUG(Logger::get(),String("name server address is ") + 
+        YARP_DEBUG(Logger::get(),ConstString("name server address is ") + 
                    address.toString());
         isSetup = true;
     }

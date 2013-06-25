@@ -120,19 +120,20 @@ void Carriers::clear() {
     lst.clear();
 }
 
-Carrier *Carriers::chooseCarrier(const String *name, const Bytes *header,
+Carrier *Carriers::chooseCarrier(const ConstString *name, 
+                                 const Bytes *header,
                                  bool load_if_needed) {
-    String s;
+    ConstString s;
     if (name!=NULL) {
         s = *name;
-        YARP_STRING_INDEX i = YARP_STRSTR(s,"+");
-        if (i!=String::npos) {
+        size_t i = s.find("+");
+        if (i!=ConstString::npos) {
             s[i] = '\0';
             s = s.c_str();
             name = &s;
         }
     }
-    for (YARP_STRING_INDEX i=0; i<(YARP_STRING_INDEX)delegates.size(); i++) {
+    for (size_t i=0; i<(size_t)delegates.size(); i++) {
         Carrier& c = *delegates[i];
         bool match = false;
         if (name!=NULL) {
@@ -165,9 +166,9 @@ Carrier *Carriers::chooseCarrier(const String *name, const Bytes *header,
         }
     }
     if (name==NULL) {
-        String txt;
+        ConstString txt;
         for (int i=0; i<(int)header->length(); i++) {
-            txt += NetType::toString(header->get()[i]);
+            txt += NetType::toString(header->get()[i]).c_str();
             txt += " ";
         }
         txt += "[";
@@ -195,7 +196,7 @@ Carrier *Carriers::chooseCarrier(const String *name, const Bytes *header,
 }
 
 
-Carrier *Carriers::chooseCarrier(const String& name) {
+Carrier *Carriers::chooseCarrier(const ConstString& name) {
     return getInstance().chooseCarrier(&name,NULL);
 }
 
@@ -209,7 +210,7 @@ Face *Carriers::listen(const Address& address) {
     // multiple possibilities
     //YARP_DEBUG(carriersLog,"listen called");
     Face *face = NULL;
-    if (address.getCarrierName() == String("fake")) {
+    if (address.getCarrierName() == ConstString("fake")) {
         face = new FakeFace();
     }
     if (face == NULL) {

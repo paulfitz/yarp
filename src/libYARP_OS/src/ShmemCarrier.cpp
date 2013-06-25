@@ -24,7 +24,7 @@ yarp::os::impl::Carrier *yarp::os::impl::ShmemCarrier::create() {
     return new ShmemCarrier(version);
 }
 
-yarp::os::impl::String yarp::os::impl::ShmemCarrier::getName() {
+yarp::os::ConstString yarp::os::impl::ShmemCarrier::getName() {
     return (version==2)?"shmem":"shmem1";
 }
 

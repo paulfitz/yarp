@@ -14,7 +14,7 @@ yarp::os::impl::TextCarrier::TextCarrier(bool ackVariant) {
     this->ackVariant = ackVariant;
 }
 
-yarp::os::impl::String yarp::os::impl::TextCarrier::getName() {
+yarp::os::ConstString yarp::os::impl::TextCarrier::getName() {
     if (ackVariant) {
         return "text_ack";
     }
@@ -71,7 +71,7 @@ bool yarp::os::impl::TextCarrier::sendHeader(Protocol& proto) {
     yarp::os::impl::String target = getSpecifierName();
     yarp::os::Bytes b((char*)target.c_str(),8);
     proto.os().write(b);
-    yarp::os::impl::String from = proto.getSenderSpecifier();
+    yarp::os::ConstString from = proto.getSenderSpecifier();
     yarp::os::Bytes b2((char*)from.c_str(),from.length());
     proto.os().write(b2);
     proto.os().write('\r');
@@ -83,7 +83,7 @@ bool yarp::os::impl::TextCarrier::sendHeader(Protocol& proto) {
 bool yarp::os::impl::TextCarrier::expectReplyToHeader(Protocol& proto) {
     if (ackVariant) {
         // expect and ignore welcome line
-        yarp::os::impl::String result = NetType::readLine(proto.is());
+        yarp::os::ConstString result = NetType::readLine(proto.is());
     }
     return true;
 }
@@ -115,13 +115,13 @@ bool yarp::os::impl::TextCarrier::sendAck(Protocol& proto) {
 bool yarp::os::impl::TextCarrier::expectAck(Protocol& proto) {
     if (ackVariant) {
         // expect and ignore acknowledgement
-        String result = NetType::readLine(proto.is());
+        ConstString result = NetType::readLine(proto.is());
     }
     return true;
 }
 
 bool yarp::os::impl::TextCarrier::respondToHeader(Protocol& proto) {
-    yarp::os::impl::String from = "Welcome ";
+    yarp::os::ConstString from = "Welcome ";
     from += proto.getRoute().getFromName();
     from += "\r\n";
     yarp::os::Bytes b2((char*)from.c_str(),from.length());
