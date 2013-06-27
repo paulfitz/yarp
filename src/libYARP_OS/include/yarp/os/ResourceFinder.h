@@ -133,7 +133,7 @@ public:
      * depend on it!
      *
      */
-    yarp::os::ConstString findFile(const char *key);
+    yarp::os::ConstString findFile(const ConstString& key);
 
     /**
      *
@@ -148,7 +148,7 @@ public:
      * depend on it!
      *
      */
-    yarp::os::ConstString findPath(const char *key);
+    yarp::os::ConstString findPath(const ConstString& key);
 
     /**
      *
@@ -164,7 +164,7 @@ public:
      * location, and would be the path returned by findPath("app")
      *
      */
-    yarp::os::Bottle findPaths(const char *key);
+    yarp::os::Bottle findPaths(const ConstString& key);
 
     /**
      *
@@ -200,9 +200,9 @@ public:
     yarp::os::Bottle getContexts();
 
     // Searchable interface
-    virtual bool check(const char *key);
-    virtual Value& find(const char *key);
-    virtual Bottle& findGroup(const char *key);
+    virtual bool check(const ConstString& key);
+    virtual Value& find(const ConstString& key);
+    virtual Bottle& findGroup(const ConstString& key);
     virtual bool isNull() const;
     virtual ConstString toString() const;
 

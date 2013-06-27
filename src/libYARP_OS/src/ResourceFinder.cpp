@@ -27,7 +27,7 @@ using namespace yarp::os::impl;
 #define RTARGET stderr
 
 
-static ConstString expandUserFileName(const char *fname) {
+static ConstString expandUserFileName(const ConstString& fname) {
     ConstString root = NetworkBase::getEnvironment("YARP_CONF");
     ConstString home = NetworkBase::getEnvironment("HOME");
     ConstString homepath = NetworkBase::getEnvironment("HOMEPATH");
@@ -308,11 +308,10 @@ public:
         return true;
     }
 
-    bool isAbsolute(const char *path) {
-        if (path[0]=='/'||path[0]=='\\') {
+    bool isAbsolute(const ConstString& str) {
+        if (str[0]=='/'||str[0]=='\\') {
             return true;
         }
-        ConstString str(path);
         if (str.length()>1) {
             if (str[1]==':') {
                 return true;
@@ -321,9 +320,8 @@ public:
         return false;
     }
 
-    bool isRooted(const char *path) {
-        if (isAbsolute(path)) return true;
-        ConstString str(path);
+    bool isRooted(const ConstString& str) {
+        if (isAbsolute(str)) return true;
         if (str.length()>=2) {
             if (str[0]=='.'&&(str[1]=='/'||str[1]=='\\')) {
                 return true;
@@ -334,36 +332,33 @@ public:
         return false;
     }
 
-    yarp::os::ConstString getPath(const char *base1,
-                                  const char *base2,
-                                  const char *base3,
-                                  const char *name) {
+    yarp::os::ConstString getPath(const ConstString& base1,
+                                  const ConstString& base2,
+                                  const ConstString& base3,
+                                  const ConstString& name) {
         ConstString s = "";
-        if (base1!=NULL) {
+
+        if (base1!="") {
             s = base1;
-            if (ConstString(base1)!="") {
-                s = s + "/";
-            }
+            s = s + "/";
         }
-        if (base2!=NULL) {
-            if (isRooted(base2)) {
-                s = base2;
-            } else {
-                s = s + base2;
-            }
-            if (ConstString(base2)!="") {
-                s = s + "/";
-            }
+
+        if (isRooted(base2)) {
+            s = base2;
+        } else {
+            s = s + base2;
         }
-        if (base3!=NULL) {
-            if (isRooted(base3)) {
-                s = base3;
-            } else {
-                s = s + base3;
-            }
-            if (ConstString(base3)!="") {
-                s = s + "/";
-            }
+        if (base2!="") {
+            s = s + "/";
+        }
+
+        if (isRooted(base3)) {
+            s = base3;
+        } else {
+            s = s + base3;
+        }
+        if (base3!="") {
+            s = s + "/";
         }
 
         s = s + name;
@@ -371,10 +366,10 @@ public:
         return s;
     }
 
-    yarp::os::ConstString check(const char *base1,
-                                const char *base2,
-                                const char *base3,
-                                const char *name,
+    yarp::os::ConstString check(const ConstString& base1,
+                                const ConstString& base2,
+                                const ConstString& base3,
+                                const ConstString& name,
                                 bool isDir) {
         ConstString s = getPath(base1,base2,base3,name);
 
@@ -390,13 +385,13 @@ public:
         return "";
     }
 
-    yarp::os::ConstString findPath(Property& config, const char *name) {
+    yarp::os::ConstString findPath(Property& config, const ConstString& name) {
         ConstString fname = config.check(name,Value(name)).asString();
         ConstString result = findFileBase(config,fname,true);
         return result;
     }
 
-    yarp::os::Bottle findPaths(Property& config, const char *name) {
+    yarp::os::Bottle findPaths(Property& config, const ConstString& name) {
         ConstString fname = config.check(name,Value(name)).asString();
         Bottle paths;
         findFileBase(config,fname,true,paths,false);
@@ -409,20 +404,20 @@ public:
         return result;
     }
 
-    yarp::os::ConstString findFile(Property& config, const char *name) {
+    yarp::os::ConstString findFile(Property& config, const ConstString& name) {
         ConstString fname = config.check(name,Value(name)).asString();
         ConstString result = findFileBase(config,fname,false);
         return result;
     }
 
-    yarp::os::ConstString findFileBase(Property& config, const char *name,
+    yarp::os::ConstString findFileBase(Property& config, const ConstString& name,
                                        bool isDir) {
         Bottle output;
         findFileBase(config,name,isDir,output,true);
         return output.get(0).asString();
     }
 
-    void findFileBase(Property& config, const char *name,
+    void findFileBase(Property& config, const ConstString& name,
                       bool isDir,
                       Bottle& output, bool justTop) {
 
@@ -432,7 +427,7 @@ public:
             config.findGroup("default_capability").tail();
 
         // check current directory
-		if (ConstString(name)==""&&isDir) {
+		if (name==""&&isDir) {
             output.addString(getPwd());
             if (justTop) return;
         }
@@ -496,7 +491,7 @@ public:
 
         if (justTop) {
             if (!quiet) {
-                fprintf(RTARGET,"||| did not find %s\n", name);
+                fprintf(RTARGET,"||| did not find %s\n", name.c_str());
             }
         }
     }
@@ -612,15 +607,15 @@ bool ResourceFinder::setDefault(const char *key, const char *val) {
 }
 
 
-yarp::os::ConstString ResourceFinder::findFile(const char *name) {
+yarp::os::ConstString ResourceFinder::findFile(const ConstString& name) {
     return HELPER(implementation).findFile(config,name);
 }
 
-yarp::os::ConstString ResourceFinder::findPath(const char *name) {
+yarp::os::ConstString ResourceFinder::findPath(const ConstString& name) {
     return HELPER(implementation).findPath(config,name);
 }
 
-yarp::os::Bottle ResourceFinder::findPaths(const char *name) {
+yarp::os::Bottle ResourceFinder::findPaths(const ConstString& name) {
     return HELPER(implementation).findPaths(config,name);
 }
 
@@ -639,17 +634,17 @@ bool ResourceFinder::setQuiet(bool quiet) {
 
 
 
-bool ResourceFinder::check(const char *key) {
+bool ResourceFinder::check(const ConstString& key) {
     return config.check(key);
 }
 
 
-Value& ResourceFinder::find(const char *key) {
+Value& ResourceFinder::find(const ConstString& key) {
     return config.find(key);
 }
 
 
-Bottle& ResourceFinder::findGroup(const char *key) {
+Bottle& ResourceFinder::findGroup(const ConstString& key) {
     return config.findGroup(key);
 }
 
