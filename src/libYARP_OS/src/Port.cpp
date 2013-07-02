@@ -394,6 +394,19 @@ bool Port::open(const Contact& contact, bool registerName,
                    blame.c_str() +
                    ")");
     }
+
+    if (success) {
+        // check whether we need to create a node
+        ConstString full = address.getRegName().c_str();
+        ConstString::size_type idx = full.find("#");
+        if (idx!=ConstString::npos) {
+            ConstString node = full.substr(0,idx);
+            ConstString sub = full.substr(idx+1,full.length());
+            printf("Yes, I should make a node called [%s] and tell it about [%s] or in full [%s]\n", node.c_str(),
+                   sub.c_str(), full.c_str());
+            // registerNode(node,sub);
+        }
+    }
     return success;
 }
 
