@@ -43,7 +43,22 @@ public:
         }
         items.clear();
     }
+
+    void add(Contactable& contactable);
+    void remove(Contactable& contactable);
+    Contact query(const char *name);
 };
+
+void NodeHelper::add(Contactable& contactable) {
+}
+
+void NodeHelper::remove(Contactable& contactable) {
+}
+
+Contact NodeHelper::query(const char *name) {
+    return Contact();
+}
+
 
 
 #define HELPER(x) (*((NodeHelper*)((x)->system_resource)))
@@ -59,3 +74,16 @@ Node::~Node() {
         system_resource = NULL;
     }
 }
+
+void Node::add(Contactable& contactable) {
+    HELPER(this).add(contactable);
+}
+
+void Node::remove(Contactable& contactable) {
+    HELPER(this).remove(contactable);
+}
+
+Contact Node::query(const char *name) {
+    return HELPER(this).query(name);
+}
+
