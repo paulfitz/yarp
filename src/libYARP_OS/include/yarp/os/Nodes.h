@@ -20,6 +20,13 @@ namespace yarp {
 
 class YARP_OS_API yarp::os::Nodes {
 public:
+    Nodes();
+    virtual ~Nodes();
+
+    void offer(Contactable& contactable);
+    void withdraw(Contactable& contactable);
+private:
+    void *system_resource;
 };
 
 #endif
