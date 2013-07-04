@@ -9,6 +9,7 @@
 
 
 #include <yarp/os/Node.h>
+#include <yarp/os/Mutex.h>
 #include <yarp/os/impl/PlatformVector.h>
 #include <yarp/os/impl/Logger.h>
 
@@ -24,6 +25,7 @@ typedef PlatformVector<NodeItem *> NodeItemList;
 class NodeHelper {
 public:
     NodeItemList items;
+    Mutex mutex;
 
     NodeHelper() {
         clear();
@@ -50,13 +52,20 @@ public:
 };
 
 void NodeHelper::add(Contactable& contactable) {
+    mutex.lock();
+    mutex.unlock();
 }
 
 void NodeHelper::remove(Contactable& contactable) {
+    mutex.lock();
+    mutex.unlock();
 }
 
 Contact NodeHelper::query(const char *name) {
-    return Contact();
+    Contact result;
+    mutex.lock();
+    mutex.unlock();
+    return result;
 }
 
 
