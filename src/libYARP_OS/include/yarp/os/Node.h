@@ -26,7 +26,8 @@ public:
     virtual void add(Contactable& contactable);
     virtual void remove(Contactable& contactable);
 
-    virtual Contact query(const char *name);
+    virtual Contact query(const char *name,
+                          const char *category = "");
 private:
     void *system_resource;
 };

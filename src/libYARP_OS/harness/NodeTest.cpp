@@ -33,6 +33,10 @@ void NodeTest::basicTest() {
     p2.open("/test#/p2");
     n.add(p1);
     n.add(p2);
+    Contact c = n.query("/p1");
+    checkTrue(c.isValid(),"found /p1");
+    c = n.query("/p9");
+    checkFalse(c.isValid(),"failed to find non-existent /p9");
     n.remove(p2);
     n.remove(p1);
 }
