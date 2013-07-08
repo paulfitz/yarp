@@ -27,7 +27,16 @@ public:
     Contactable *contactable;
 };
 
-class NodeHelper {
+class NodeArgs {
+public:
+    Bottle request;
+    Bottle args;
+    Bottle reply;
+    int code;
+    ConstString msg;
+};
+
+class NodeHelper : public PortReader {
 public:
     std::map<ConstString,NodeItem> by_part_name;
     std::multimap<ConstString,NodeItem> by_category;
@@ -57,6 +66,50 @@ public:
     void interrupt() {
         port.interrupt();
     }
+
+    virtual bool read(ConnectionReader& reader);
+
+    void getBusStats(NodeArgs& na) {
+        na.reply.fromString("hmm");
+    }
+
+    void getBusInfo(NodeArgs& na) {
+        na.reply.fromString("hmm");
+    }
+
+    void getMasterUri(NodeArgs& na) {
+        na.reply.fromString("hmm");
+    }
+
+    void shutdown(NodeArgs& na) {
+        na.reply.fromString("hmm");
+    }
+
+    void getPid(NodeArgs& na) {
+        na.reply.fromString("hmm");
+    }
+
+    void getSubscriptions(NodeArgs& na) {
+        // List resources with either no category or "-" category.
+        // But how to determine types, for ROS purposes?
+        na.reply.fromString("hmm");
+    }
+
+    void getPublications(NodeArgs& na) {
+        na.reply.fromString("hmm");
+    }
+
+    void paramUpdate(NodeArgs& na) {
+        na.reply.fromString("hmm");
+    }
+
+    void publisherUpdate(NodeArgs& na) {
+        na.reply.fromString("hmm");
+    }
+
+    void requestTopic(NodeArgs& na) {
+        na.reply.fromString("hmm");
+    }
 };
 
 void NodeHelper::add(Contactable& contactable) {
@@ -69,6 +122,7 @@ void NodeHelper::add(Contactable& contactable) {
         return;
     }
     if (port.getName()=="") {
+        port.setReader(*this);
         port.open(name);
     }
     item.contactable = &contactable;
@@ -91,6 +145,27 @@ Contact NodeHelper::query(const char *name, const char *category) {
         result = i->second.contactable->where();
     }
     return result;
+}
+
+bool NodeHelper::read(ConnectionReader& reader) {
+    NodeArgs na;
+    na.request.read(reader);
+    ConstString key = na.request.get(0).asString();
+    na.args = na.request.tail().tail();
+    na.code = -1;
+    if (key=="getBusStats") {
+        getBusStats(na);
+    } else {
+        na.reply.fromString("[fail]");
+    }
+    if (reader.getWriter()) {
+        Bottle full;
+        full.addInt(na.code);
+        full.addString(na.msg);
+        full.addList() = na.reply;
+        full.write(*reader.getWriter());
+    }
+    return true;
 }
 
 
