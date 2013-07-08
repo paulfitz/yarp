@@ -13,12 +13,14 @@
 #include <yarp/os/Port.h>
 #include <yarp/os/impl/PortCore.h>
 #include <yarp/os/impl/Logger.h>
+#include <yarp/os/impl/NameClient.h>
 #include <yarp/os/Contact.h>
 #include <yarp/os/Network.h>
 #include <yarp/os/Bottle.h>
 #include <yarp/os/Network.h>
 #include <yarp/os/Time.h>
 #include <yarp/os/impl/SemaphoreImpl.h>
+#include <yarp/os/NestedContact.h>
 
 using namespace yarp::os::impl;
 using namespace yarp::os;
@@ -396,16 +398,9 @@ bool Port::open(const Contact& contact, bool registerName,
     }
 
     if (success) {
-        // check whether we need to create a node
-        ConstString full = address.getRegName().c_str();
-        ConstString::size_type idx = full.find("#");
-        if (idx!=ConstString::npos) {
-            ConstString node = full.substr(0,idx);
-            ConstString sub = full.substr(idx+1,full.length());
-            printf("Yes, I should make a node called [%s] and tell it about [%s] or in full [%s]\n", node.c_str(),
-                   sub.c_str(), full.c_str());
-            // registerNode(node,sub);
-        }
+        // create a node if needed
+        Nodes& nodes = NameClient::getNameClient().getNodes();
+        nodes.add(*this);
     }
     return success;
 }
@@ -419,6 +414,9 @@ bool Port::addOutput(const ConstString& name, const ConstString& carrier) {
 }
 
 void Port::close() {
+    Nodes& nodes = NameClient::getNameClient().getNodes();
+    nodes.remove(*this);
+
     PortCoreAdapter& core = HELPER(implementation);
     core.finishReading();
     core.finishWriting();
@@ -430,6 +428,8 @@ void Port::close() {
 }
 
 void Port::interrupt() {
+    Nodes& nodes = NameClient::getNameClient().getNodes();
+    nodes.remove(*this);
     PortCoreAdapter& core = HELPER(implementation);
     core.interrupt();
 }

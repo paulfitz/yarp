@@ -10,7 +10,7 @@
 #ifndef _YARP2_NODES_
 #define _YARP2_NODES_
 
-#include <yarp/os/Node.h>
+#include <yarp/os/Contactables.h>
 
 namespace yarp {
     namespace os {
@@ -18,13 +18,20 @@ namespace yarp {
     }
 }
 
-class YARP_OS_API yarp::os::Nodes {
+class YARP_OS_API yarp::os::Nodes : public Contactables {
 public:
     Nodes();
     virtual ~Nodes();
 
-    void offer(Contactable& contactable);
-    void withdraw(Contactable& contactable);
+    virtual void add(Contactable& contactable);
+    virtual void remove(Contactable& contactable);
+    
+    virtual Contact query(const char *name,
+                          const char *category = "");
+
+    void interrupt();
+    
+    bool enable(bool flag);
 private:
     void *system_resource;
 };

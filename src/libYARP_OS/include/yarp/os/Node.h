@@ -28,6 +28,8 @@ public:
 
     virtual Contact query(const char *name,
                           const char *category = "");
+
+    void interrupt();
 private:
     void *system_resource;
 };
