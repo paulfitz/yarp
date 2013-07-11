@@ -156,3 +156,8 @@ bool Nodes::enable(bool flag) {
     HELPER(this).mutex.unlock();
     return result;
 }
+
+void Nodes::clear() {
+    HELPER(this).clear();
+}
+

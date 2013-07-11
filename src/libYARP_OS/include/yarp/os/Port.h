@@ -260,6 +260,7 @@ public:
      */
     int getVerbosity();
 
+    virtual Type getType();
 private:
     void *implementation;
 

@@ -23,6 +23,9 @@ public:
 
     void basicNodeTest();
     void basicNodesTest();
+    void basicTypeTest();
+    void builtinNodeTest();
+    void basicApiTest();
 
     virtual void runTests();
 };
@@ -43,6 +46,7 @@ void NodeTest::basicNodeTest() {
     checkFalse(c.isValid(),"failed to find non-existent /p9");
     n.remove(p2);
     n.remove(p1);
+    NameClient::getNameClient().getNodes().enable(true);
 }
 
 void NodeTest::basicNodesTest() {
@@ -73,12 +77,61 @@ void NodeTest::basicNodesTest() {
     n.remove(p3);
     n.remove(p2);
     n.remove(p1);
+    NameClient::getNameClient().getNodes().enable(true);
 }
+
+void NodeTest::basicTypeTest() {
+    report(0,"types coevolving with nodes");
+    Bottle b;
+    Type typ = b.getType();
+    checkFalse(typ.hasName(),"Bottle type is not named yet");
+}
+
+void NodeTest::builtinNodeTest() {
+    report(0,"check that auto node works");
+    NameClient::getNameClient().getNodes().clear();
+    {
+        checkFalse(NetworkBase::exists("/test"),"node does not exist yet");
+        Port p1;
+        Port p2;
+        p1.open("/test#/p1");
+        p2.open("/test#/p2");
+        checkTrue(NetworkBase::exists("/test"),"node exists now");
+    }
+    NameClient::getNameClient().getNodes().clear();
+}
+
+void NodeTest::basicApiTest() {
+    report(0,"check node api");
+    NameClient::getNameClient().getNodes().clear();
+    Port p1;
+    Port p2;
+    p1.open("/test#/p1");
+    p2.open("/test#/p2");
+    Bottle cmd, reply;
+    cmd.fromString("getSubscriptions dummy");
+    NetworkBase::write(Contact::byName("/test"),cmd,reply);
+    checkEqual(reply.get(0).asInt(),1,"getSubscriptions api success");
+    cmd.fromString("requestTopic dummy /p2 (TCPROS)");
+    NetworkBase::write(Contact::byName("/test"),cmd,reply);
+    //printf("got %s\n", reply.toString().c_str());
+    checkEqual(reply.get(0).asInt(),1,"found /p2");
+    cmd.fromString("requestTopic dummy /p3 (TCPROS)");
+    NetworkBase::write(Contact::byName("/test"),cmd,reply);
+    checkEqual(reply.get(0).asInt(),0,"failed to find /p3");
+    p1.close();
+    p2.close();
+    NameClient::getNameClient().getNodes().clear();
+}
+
 
 void NodeTest::runTests() {
     NetworkBase::setLocalMode(true);
     basicNodeTest();
     basicNodesTest();
+    basicTypeTest();
+    builtinNodeTest();
+    basicApiTest();
     NetworkBase::setLocalMode(false);
 }
 

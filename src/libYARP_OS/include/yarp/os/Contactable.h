@@ -220,6 +220,8 @@ public:
      * @param reader the external reader to use
      */
     virtual void setReader(PortReader& reader) = 0;
+
+    virtual Type getType() = 0;
 };
 
 #endif

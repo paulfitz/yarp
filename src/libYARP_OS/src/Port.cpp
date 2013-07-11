@@ -39,6 +39,8 @@ private:
     SemaphoreImpl produce, consume, readBlock;
     PortReaderCreator *recReadCreator;
     int recWaitAfterSend;
+    Type typ;
+    bool checkedType;
 public:
     PortCoreAdapter(Port& owner) :
         owner(owner), stateMutex(1), readDelegate(NULL), writeDelegate(NULL),
@@ -52,7 +54,8 @@ public:
         dropDue(false),
         produce(0), consume(0), readBlock(1),
         recReadCreator(NULL),
-        recWaitAfterSend(-1)
+        recWaitAfterSend(-1),
+        checkedType(false)
     {
     }
 
@@ -61,6 +64,15 @@ public:
         closed = false;
         opened = true;
         stateMutex.post();
+    }
+
+    void checkType(PortReader& reader) {
+        if (!checkedType) {
+            if (!typ.isValid()) {
+                typ = reader.getReadType();
+            }
+            checkedType = true;
+        }
     }
 
     void finishReading() {
@@ -175,6 +187,7 @@ public:
         stateMutex.wait();
         readActive = true;
         readDelegate = &reader;
+        checkType(reader);
         writeDelegate = NULL;
         this->willReply = willReply;
         consume.post(); // happy consumer
@@ -193,6 +206,7 @@ public:
     bool reply(PortWriter& writer, bool drop, bool /*interrupted*/) {
         // send reply even if interrupt has happened in interim
         if (!replyDue) return false;
+
         replyDue = false;
         dropDue = drop;
         writeDelegate = &writer;
@@ -212,6 +226,7 @@ public:
         readActive = true;
         readBackground = true;
         readDelegate = &reader;
+        checkType(reader);
         consume.post(); // just do this once
         stateMutex.post();
     }
@@ -249,6 +264,13 @@ public:
 
     void setOpen(bool opened) {
         this->opened = opened;
+    }
+
+    Type getType() {
+        stateMutex.wait();
+        Type t = typ;
+        stateMutex.post();
+        return t;
     }
 };
 
@@ -636,4 +658,7 @@ int Port::getVerbosity() {
     return HELPER(implementation).getVerbosity();
 }
 
+Type Port::getType() {
+    return HELPER(implementation).getType();
+}
 

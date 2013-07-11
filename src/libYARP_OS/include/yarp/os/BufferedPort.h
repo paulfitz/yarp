@@ -292,6 +292,9 @@ public:
         reader.setTargetPeriod(period);
     }
 
+    virtual Type getType() {
+        return port.getType();
+    }
 private:
     // solaris preferred order - strange
     PortWriterBuffer<T> writer;

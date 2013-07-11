@@ -32,6 +32,7 @@ public:
     void interrupt();
     
     bool enable(bool flag);
+    void clear();
 private:
     void *system_resource;
 };

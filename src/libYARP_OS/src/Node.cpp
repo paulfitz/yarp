@@ -25,6 +25,31 @@ class NodeItem {
 public:
     NestedContact nc;
     Contactable *contactable;
+
+    void update() {
+        if (nc.getTypeName()=="") {
+            if (!contactable) return;
+            Type typ = contactable->getType();
+            if (typ.isValid()) {
+                nc.setTypeName(typ.getName());
+            }
+        }
+    }
+
+    bool isSubscriber() {
+        ConstString cat = nc.getCategory();
+        return (cat=="" || cat=="-");
+    }
+
+    bool isPublisher() {
+        ConstString cat = nc.getCategory();
+        return (cat=="" || cat=="+");
+    }
+
+    bool isTopic() {
+        ConstString cat = nc.getCategory();
+        return (cat=="" || cat=="+" || cat=="-");
+    }
 };
 
 class NodeArgs {
@@ -34,6 +59,42 @@ public:
     Bottle reply;
     int code;
     ConstString msg;
+    bool should_drop;
+    
+    NodeArgs() {
+        code = -1;
+        should_drop = true;
+    }
+
+    void error(const char *txt) {
+        msg = txt;
+        code = -1;
+    }
+
+    void fail(const char *txt) {
+        msg = txt;
+        code = 0;
+    }
+
+    void success() {
+        msg = "";
+        code = 1;
+    }
+    
+    void drop() {
+        should_drop = true;
+    }
+
+    void persist() {
+        should_drop = false;
+    }
+
+    void fromExternal(const Bottle& alt) {
+        code = alt.get(0).asInt();
+        msg = alt.get(1).asString();
+        Bottle *nest = alt.get(2).asList();
+        if (nest) reply = *nest;
+    }
 };
 
 class NodeHelper : public PortReader {
@@ -69,12 +130,27 @@ public:
 
     virtual bool read(ConnectionReader& reader);
 
+    Contact lookup(const ConstString& topic) {
+        mutex.lock();
+        std::map<ConstString,NodeItem>::const_iterator i = 
+            by_part_name.find(topic);
+        if (i == by_part_name.end()) {
+            mutex.unlock();
+            return Contact();
+        }
+        Contact c = i->second.contactable->where();
+        mutex.unlock();
+        return c;
+    }
+
     void getBusStats(NodeArgs& na) {
-        na.reply.fromString("hmm");
+        na.reply.addList();
+        na.success();
     }
 
     void getBusInfo(NodeArgs& na) {
-        na.reply.fromString("hmm");
+        na.reply.addList();
+        na.success();
     }
 
     void getMasterUri(NodeArgs& na) {
@@ -86,17 +162,36 @@ public:
     }
 
     void getPid(NodeArgs& na) {
-        na.reply.fromString("hmm");
+        na.reply.addInt(ACE_OS::getpid());
+        na.success();
     }
 
     void getSubscriptions(NodeArgs& na) {
-        // List resources with either no category or "-" category.
-        // But how to determine types, for ROS purposes?
-        na.reply.fromString("hmm");
+        mutex.lock();
+        for (std::map<ConstString,NodeItem>::iterator it = by_part_name.begin(); it != by_part_name.end(); it++) {
+            NodeItem& item = it->second;
+            if (!item.isSubscriber()) continue;
+            item.update();
+            Bottle& lst = na.reply.addList();
+            lst.addString(item.nc.getNestedName());
+            lst.addString(item.nc.getTypeName());
+        }
+        mutex.unlock();
+        na.success();
     }
 
     void getPublications(NodeArgs& na) {
-        na.reply.fromString("hmm");
+        mutex.lock();
+        for (std::map<ConstString,NodeItem>::iterator it = by_part_name.begin(); it != by_part_name.end(); it++) {
+            NodeItem& item = it->second;
+            if (!item.isPublisher()) continue;
+            item.update();
+            Bottle& lst = na.reply.addList();
+            lst.addString(item.nc.getNestedName());
+            lst.addString(item.nc.getTypeName());
+        }
+        mutex.unlock();
+        na.success();
     }
 
     void paramUpdate(NodeArgs& na) {
@@ -104,11 +199,34 @@ public:
     }
 
     void publisherUpdate(NodeArgs& na) {
-        na.reply.fromString("hmm");
+        ConstString topic = na.args.get(0).asString();
+        Contact c = lookup(topic);
+        if (!c.isValid()) {
+            na.fail("Cannot find topic");
+            return;
+        }
+        // just pass the message along, YARP ports know what to do with it
+        ContactStyle style;
+        style.admin = true;
+        Bottle reply;
+        if (!NetworkBase::write(c,na.request,reply,style)) {
+            na.fail("Cannot communicate with local port");
+            return;
+        }
+        na.fromExternal(reply);
     }
 
     void requestTopic(NodeArgs& na) {
-        na.reply.fromString("hmm");
+        ConstString topic = na.args.get(0).asString();
+        Contact c = lookup(topic);
+        if (!c.isValid()) {
+            na.fail("Cannot find topic");
+            return;
+        }
+        na.reply.addString("TCPROS");
+        na.reply.addString(c.getHost());
+        na.reply.addInt(c.getPort());
+        na.success();
     }
 };
 
@@ -152,11 +270,31 @@ bool NodeHelper::read(ConnectionReader& reader) {
     na.request.read(reader);
     ConstString key = na.request.get(0).asString();
     na.args = na.request.tail().tail();
-    na.code = -1;
     if (key=="getBusStats") {
         getBusStats(na);
+    } else if (key=="getBusInfo") {
+        getBusInfo(na);
+    } else if (key=="getMasterUri") {
+        getMasterUri(na);
+    } else if (key=="shutdown") {
+        shutdown(na);
+    } else if (key=="getPid") {
+        getPid(na);
+    } else if (key=="getSubscriptions") {
+        getSubscriptions(na);
+    } else if (key=="getPublications") {
+        getPublications(na);
+    } else if (key=="paramUpdate") {
+        paramUpdate(na);
+    } else if (key=="publisherUpdate") {
+        publisherUpdate(na);
+    } else if (key=="requestTopic") {
+        requestTopic(na);
     } else {
-        na.reply.fromString("[fail]");
+        na.error("I have no idea what you are talking about");
+    }
+    if (na.should_drop) {
+        reader.requestDrop(); // ROS likes to close down.
     }
     if (reader.getWriter()) {
         Bottle full;
