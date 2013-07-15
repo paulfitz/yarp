@@ -12,6 +12,7 @@
 
 #include <yarp/os/ConstString.h>
 #include <yarp/os/Searchable.h>
+#include <yarp/os/NestedContact.h>
 
 namespace yarp {
     namespace os {
@@ -107,6 +108,7 @@ public:
                       const ConstString& host,
                       int portNumber) const;
 
+    Contact addNested(const NestedContact& nc) const;
 
     /**
      *
@@ -161,6 +163,9 @@ public:
      *         if no carrier is set
      */
     ConstString getCarrier() const;
+
+
+    const NestedContact& getNested() const;
 
 
     /**

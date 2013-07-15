@@ -43,9 +43,10 @@ public:
         by_name.clear();
     }
 
-    Node *getNode(const Contactable& contactable, bool create);
+    Node *getNode(const ConstString& name, bool create);
 
     void add(Contactable& contactable);
+    void prepare(const ConstString& name);
     void remove(Contactable& contactable);
     Contact query(const char *name,const char *category);
     void interrupt();
@@ -55,10 +56,23 @@ public:
         active = flag;
         return active;
     }
+
+    Contact getParent(const char *name) {
+        Contact result;
+        mutex.lock();
+        NestedContact nc;
+        nc.fromString(name);
+        std::map<ConstString,Node *>::const_iterator it = by_name.find(nc.getNodeName());
+        if (it!=by_name.end()) {
+            result = it->second->where();
+        }
+        mutex.unlock();
+        return result;
+    }
 };
 
-Node *NodesHelper::getNode(const Contactable& contactable, bool create) {
-    NestedContact nc(contactable.getName());
+Node *NodesHelper::getNode(const ConstString& name, bool create) {
+    NestedContact nc(name);
     if (!nc.isNested()) return NULL;
     std::map<ConstString,Node *>::const_iterator it = by_name.find(nc.getNodeName());
     Node *node = NULL;
@@ -67,6 +81,7 @@ Node *NodesHelper::getNode(const Contactable& contactable, bool create) {
             node = new Node();
             YARP_ASSERT(node!=NULL);
             by_name[nc.getNodeName()] = node;
+            node->prepare(nc.getNodeName());
         }
     } else {
         node = it->second;
@@ -76,13 +91,18 @@ Node *NodesHelper::getNode(const Contactable& contactable, bool create) {
 
 void NodesHelper::add(Contactable& contactable) {
     if (!active) return;
-    Node *node = getNode(contactable,true);
+    Node *node = getNode(contactable.getName(),true);
     if (node) node->add(contactable);
+}
+
+void NodesHelper::prepare(const ConstString& name) {
+    if (!active) return;
+    getNode(name,true);
 }
 
 void NodesHelper::remove(Contactable& contactable) {
     if (!active) return;
-    Node *node = getNode(contactable,false);
+    Node *node = getNode(contactable.getName(),false);
     if (node) node->remove(contactable);
 }
 
@@ -159,5 +179,17 @@ bool Nodes::enable(bool flag) {
 
 void Nodes::clear() {
     HELPER(this).clear();
+}
+
+Contact Nodes::getParent(const char *name) {
+    return HELPER(this).getParent(name);
+}
+
+void Nodes::prepare(const char *name) {
+    NestedContact nc(name);
+    if (!nc.isNested()) return;
+    HELPER(this).mutex.unlock();
+    HELPER(this).prepare(name);
+    HELPER(this).mutex.lock();
 }
 

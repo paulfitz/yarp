@@ -16,6 +16,8 @@
 
 #include <stdio.h>
 
+#include <map>
+
 namespace yarp {
     namespace os {
         class RosNameSpace;
@@ -95,6 +97,7 @@ public:
 
 private:
     Contact contact;
+    std::map<ConstString,Contact> contact_cache;
 };
 
 #endif

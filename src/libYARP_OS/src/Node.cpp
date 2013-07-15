@@ -124,6 +124,8 @@ public:
     void remove(Contactable& contactable);
     Contact query(const char *name, const char *category);
 
+    void prepare(const ConstString& name);
+
     void interrupt() {
         port.interrupt();
     }
@@ -230,6 +232,13 @@ public:
     }
 };
 
+void NodeHelper::prepare(const ConstString& name) {
+    if (port.getName()=="") {
+        port.setReader(*this);
+        port.open(name);
+    }
+}
+
 void NodeHelper::add(Contactable& contactable) {
     NodeItem item;
     item.nc.fromString(contactable.getName());
@@ -239,10 +248,7 @@ void NodeHelper::add(Contactable& contactable) {
                 name.c_str(), item.nc.getNodeName().c_str());
         return;
     }
-    if (port.getName()=="") {
-        port.setReader(*this);
-        port.open(name);
-    }
+    prepare(name);
     item.contactable = &contactable;
     name_cache[&contactable] = item;
     by_part_name[item.nc.getNestedName()] = item;
@@ -266,8 +272,12 @@ Contact NodeHelper::query(const char *name, const char *category) {
 }
 
 bool NodeHelper::read(ConnectionReader& reader) {
+    if (!reader.isValid()) return false;
     NodeArgs na;
     na.request.read(reader);
+    printf("NODE %s >>> %s\n", 
+           name.c_str(),
+           na.request.toString().c_str());
     ConstString key = na.request.get(0).asString();
     na.args = na.request.tail().tail();
     if (key=="getBusStats") {
@@ -346,4 +356,14 @@ Contact Node::query(const char *name,
 
 void Node::interrupt() {
     HELPER(this).interrupt();
+}
+
+Contact Node::where() {
+    return HELPER(this).port.where();
+}
+
+void Node::prepare(const char *name) {
+    HELPER(this).mutex.lock();
+    HELPER(this).prepare(name);
+    HELPER(this).mutex.unlock();
 }

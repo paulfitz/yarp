@@ -126,6 +126,12 @@ Contact Contact::addName(const ConstString& name) const {
     return result;
 }
 
+Contact Contact::addNested(const NestedContact& nc) const {
+    Contact result;
+    HELPER(result.implementation) = HELPER(implementation);
+    HELPER(result.implementation).setFlavor(nc);
+    return result;
+}
 
 ConstString Contact::getName() const {
     ConstString name = regName;
@@ -151,6 +157,10 @@ ConstString Contact::getCarrier() const {
 
 int Contact::getPort() const {
     return port;
+}
+
+const NestedContact& Contact::getNested() const {
+    return HELPER(implementation).getFlavor();
 }
 
 

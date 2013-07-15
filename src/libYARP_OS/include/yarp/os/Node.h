@@ -29,7 +29,11 @@ public:
     virtual Contact query(const char *name,
                           const char *category = "");
 
+    virtual Contact where();
+
     void interrupt();
+
+    virtual void prepare(const char *name);
 private:
     void *system_resource;
 };

@@ -359,6 +359,7 @@ bool Port::open(const Contact& contact, bool registerName,
                                          contact2.getHost(),
                                          contact2.getPort())
         .addName(contact2.getName());
+    caddress.setFlavor(contact2.getNested());
     Contact address = caddress;
 
     core.setReadHandler(core);
@@ -371,6 +372,12 @@ bool Port::open(const Contact& contact, bool registerName,
 
     core.setControlRegistration(registerName);
     success = (address.isValid()||local)&&(fakeName==NULL);
+
+    if (success) {
+        // create a node if needed
+        Nodes& nodes = NameClient::getNameClient().getNodes();
+        nodes.prepare(address.getRegName().c_str());
+    }
 
     ConstString blame = "invalid address";
     if (success) {

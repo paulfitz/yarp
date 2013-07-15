@@ -135,6 +135,7 @@ YARP_SSIZE_T XmlRpcStream::read(const Bytes& b) {
                 } else {
                     cprefix = server.parseRequest(xresult);
                     bool isAdmin = false;
+                    /*
                     if (interpretRos) {
                         if (cprefix=="publisherUpdate") {
                             isAdmin = true;
@@ -149,6 +150,7 @@ YARP_SSIZE_T XmlRpcStream::read(const Bytes& b) {
                             isAdmin = true;
                         }
                     }
+                    */
                     prefix = isAdmin?"a\n":"d\n";
                     prefix += cprefix;
                     prefix += " ";

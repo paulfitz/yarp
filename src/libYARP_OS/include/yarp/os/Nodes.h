@@ -29,6 +29,10 @@ public:
     virtual Contact query(const char *name,
                           const char *category = "");
 
+    virtual Contact getParent(const char *name);
+
+    virtual void prepare(const char *name);
+
     void interrupt();
     
     bool enable(bool flag);
