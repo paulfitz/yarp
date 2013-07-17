@@ -26,6 +26,7 @@ public:
     void basicTypeTest();
     void builtinNodeTest();
     void basicApiTest();
+    void portTopicCombo();
 
     virtual void runTests();
 };
@@ -125,6 +126,22 @@ void NodeTest::basicApiTest() {
 }
 
 
+void NodeTest::portTopicCombo() {
+    /*
+
+      // hold off, until ancient test name server is replaced with
+      // sqlite based name server (capabile of managing topics)
+
+    report(0,"check port node combo");
+    Port p1;
+    Port p2;
+    p1.open("/test#+/p1");
+    p2.open("/test#-/p2");
+    checkTrue(NetworkBase::isConnected(p1.getName(),
+                                       p2.getName()), "auto connect working");
+    */
+}
+
 void NodeTest::runTests() {
     NetworkBase::setLocalMode(true);
     basicNodeTest();
@@ -132,6 +149,7 @@ void NodeTest::runTests() {
     basicTypeTest();
     builtinNodeTest();
     basicApiTest();
+    portTopicCombo();
     NetworkBase::setLocalMode(false);
 }
 

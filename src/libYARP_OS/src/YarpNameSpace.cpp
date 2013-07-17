@@ -40,16 +40,44 @@ Contact YarpNameSpace::queryName(const ConstString& name) {
 
 
 Contact YarpNameSpace::registerName(const ConstString& name) {
-    NameClient& nic = HELPER(this);
-    return nic.registerName(name);
+    return registerContact(Contact::byName(name));
+    //NameClient& nic = HELPER(this);
+    //Address address = nic.registerName(name);
+    //return address.toContact();
 }
 
 Contact YarpNameSpace::registerContact(const Contact& contact) {
     NameClient& nic = HELPER(this);
-    return nic.registerName(contact.getName().c_str(),contact);
+    Address address = nic.registerName(contact.getName().c_str(),
+                                       Address::fromContact(contact));
+    if (address.isValid()) {
+        NestedContact nc;
+        nc.fromString(contact.getName().c_str());
+        ConstString cat = nc.getCategory();
+        if (cat == "+" || cat== "-") {
+            ContactStyle style;
+            Contact c1 = Contact::byName(nc.getFullName());
+            Contact c2 = Contact::byName(ConstString("topic:/") + nc.getNestedName());
+            connectPortToTopic((cat=="+")?c1:c2,
+                               (cat=="+")?c2:c1,
+                               style);
+        }
+    }
+    return address.toContact();
 }
 
-Contact YarpNameSpace::unregisterName(const ConstString& name) {
+Contact YarpNameSpace::unregisterName(const char *name) {
+    NestedContact nc;
+    nc.fromString(name);
+    ConstString cat = nc.getCategory();
+    if (cat == "+" || cat== "-") {
+        ContactStyle style;
+        Contact c1 = Contact::byName(nc.getFullName());
+        Contact c2 = Contact::byName(ConstString("topic:/") + nc.getNestedName());
+        disconnectPortFromTopic((cat=="+")?c1:c2,
+                                (cat=="+")?c2:c1,
+                                style);
+    }
     NameClient& nic = HELPER(this);
     return nic.unregisterName(name);
 }
