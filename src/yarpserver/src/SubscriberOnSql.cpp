@@ -372,8 +372,6 @@ bool SubscriberOnSql::checkSubscription(const ConstString& src,const ConstString
     if (store!=NULL) {
         Contact csrc = store->query(src);
         Contact cdest = store->query(dest);
-        printf("GOT %s %s\n", csrc.toString().c_str(),
-               cdest.toString().c_str());
         if (csrc.isValid()&&cdest.isValid()) {
             bool srcTopic = (csrc.getCarrier()=="topic");
             bool destTopic = (cdest.getCarrier()=="topic");

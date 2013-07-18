@@ -129,16 +129,21 @@ void NodeTest::basicApiTest() {
 
 void NodeTest::portTopicCombo() {
     report(0,"check port node combo");
+    NameClient::getNameClient().getNodes().clear();
     Port p1;
     Port p2;
     p1.open("/test#+/p1");
     p2.open("/test#-/p1");
-    Time::delay(2);
-    Network::connect(p1.getName(),"topic://bozo");
-    Network::connect("topic://bozo",p2.getName());
-    Time::delay(200);
+    // topic-based connections are asynchronous
+    for (int i=0; i<100; i++) {
+        if (NetworkBase::isConnected(p1.getName(),
+                                     p2.getName())) break;
+        Time::delay(0.1);
+               
+    }
     checkTrue(NetworkBase::isConnected(p1.getName(),
                                        p2.getName()), "auto connect working");
+    NameClient::getNameClient().getNodes().clear();
 }
 
 void NodeTest::runTests() {

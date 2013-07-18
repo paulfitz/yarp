@@ -85,7 +85,6 @@ yarp::os::Contact NameServiceOnTriples::query(const ConstString& port) {
     Contact remote;
     TripleSource& mem = *db;
     NameTripleState act(cmd,reply,event,remote,mem);
-    printf("Running query...\n");
     return query(port,act,"");
 }
 

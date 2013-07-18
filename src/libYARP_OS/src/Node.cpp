@@ -275,9 +275,9 @@ bool NodeHelper::read(ConnectionReader& reader) {
     if (!reader.isValid()) return false;
     NodeArgs na;
     na.request.read(reader);
-    printf("NODE %s >>> %s\n", 
-           name.c_str(),
-           na.request.toString().c_str());
+    //printf("NODE %s >>> %s\n", 
+    //name.c_str(),
+    //na.request.toString().c_str());
     ConstString key = na.request.get(0).asString();
     na.args = na.request.tail().tail();
     if (key=="getBusStats") {
