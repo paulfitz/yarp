@@ -13,6 +13,7 @@
 
 #include <yarp/os/impl/Logger.h>
 #include <yarp/os/impl/Companion.h>
+#include <yarp/os/Network.h>
 
 #include "TestList.h"
 //

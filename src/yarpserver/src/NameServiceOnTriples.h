@@ -80,6 +80,14 @@ public:
         this->serverContact = serverContact;
     }
 
+    void open(TripleSource *db,
+              Allocator *alloc,
+              const yarp::os::Contact& serverContact) {
+        this->db = db;
+        this->alloc = alloc;
+        this->serverContact = serverContact;
+    }
+
     void setSubscriber(Subscriber *subscriber) {
         this->subscriber = subscriber;
     }
