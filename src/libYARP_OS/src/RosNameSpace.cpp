@@ -193,6 +193,11 @@ Contact RosNameSpace::registerContact(const Contact& contact) {
     */
 }
 
+Contact RosNameSpace::updateContact(const Contact& contact) {
+    return Contact();
+}
+
+
 Contact RosNameSpace::unregisterName(const ConstString& rname) {
     NestedContact nc;
     nc.fromString(rname);

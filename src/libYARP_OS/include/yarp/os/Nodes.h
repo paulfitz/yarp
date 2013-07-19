@@ -33,6 +33,8 @@ public:
 
     virtual void prepare(const char *name);
 
+    virtual void update(Contactable& contactable);
+
     void interrupt();
     
     bool enable(bool flag);

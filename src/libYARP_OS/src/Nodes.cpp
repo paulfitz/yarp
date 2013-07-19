@@ -46,6 +46,7 @@ public:
     Node *getNode(const ConstString& name, bool create);
 
     void add(Contactable& contactable);
+    void update(Contactable& contactable);
     void prepare(const ConstString& name);
     void remove(Contactable& contactable);
     Contact query(const char *name,const char *category);
@@ -93,6 +94,12 @@ void NodesHelper::add(Contactable& contactable) {
     if (!active) return;
     Node *node = getNode(contactable.getName(),true);
     if (node) node->add(contactable);
+}
+
+void NodesHelper::update(Contactable& contactable) {
+    if (!active) return;
+    Node *node = getNode(contactable.getName(),true);
+    if (node) node->update(contactable);
 }
 
 void NodesHelper::prepare(const ConstString& name) {
@@ -193,3 +200,10 @@ void Nodes::prepare(const char *name) {
     HELPER(this).mutex.lock();
 }
 
+void Nodes::update(Contactable& contactable) {
+    NestedContact nc(contactable.getName());
+    if (!nc.isNested()) return;
+    HELPER(this).mutex.unlock();
+    HELPER(this).update(contactable);
+    HELPER(this).mutex.lock();
+}

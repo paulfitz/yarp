@@ -24,6 +24,7 @@ public:
     virtual ~Node();
     
     virtual void add(Contactable& contactable);
+    virtual void update(Contactable& contactable);
     virtual void remove(Contactable& contactable);
 
     virtual Contact query(const char *name,

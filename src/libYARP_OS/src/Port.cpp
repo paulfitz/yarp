@@ -41,6 +41,9 @@ private:
     int recWaitAfterSend;
     Type typ;
     bool checkedType;
+    bool usedForRead;
+    bool usedForWrite;
+    bool usedForRpc;
 public:
     PortCoreAdapter(Port& owner) :
         owner(owner), stateMutex(1), readDelegate(NULL), writeDelegate(NULL),
@@ -55,7 +58,10 @@ public:
         produce(0), consume(0), readBlock(1),
         recReadCreator(NULL),
         recWaitAfterSend(-1),
-        checkedType(false)
+        checkedType(false),
+        usedForRead(false),
+        usedForWrite(false),
+        usedForRpc(false)
     {
     }
 
@@ -73,6 +79,15 @@ public:
             }
             checkedType = true;
         }
+    }
+
+    void alertOnRead() {
+    }
+
+    void alertOnWrite() {
+    }
+
+    void alertOnRpc() {
     }
 
     void finishReading() {
@@ -488,6 +503,7 @@ Contact Port::where() const {
 bool Port::addOutput(const Contact& contact) {
     PortCoreAdapter& core = HELPER(implementation);
     if (core.isInterrupted()) return false;
+    core.alertOnWrite();
     if (!core.isListening()) {
         return core.addOutput(contact.toString().c_str(),NULL,NULL,true);
     }
@@ -503,6 +519,7 @@ bool Port::addOutput(const Contact& contact) {
 bool Port::write(PortWriter& writer, PortWriter *callback) {
     PortCoreAdapter& core = HELPER(implementation);
     if (core.isInterrupted()) return false;
+    core.alertOnWrite();
     bool result = false;
     //WritableAdapter adapter(writer);
     result = core.send(writer,NULL,callback);
@@ -526,6 +543,8 @@ bool Port::write(PortWriter& writer, PortReader& reader,
                  PortWriter *callback) const {
     PortCoreAdapter& core = HELPER(implementation);
     if (core.isInterrupted()) return false;
+    core.alertOnRpc();
+    core.alertOnWrite();
     bool result = false;
     result = core.send(writer,&reader,callback);
     if (!result) {
@@ -545,6 +564,8 @@ bool Port::write(PortWriter& writer, PortReader& reader,
  */
 bool Port::read(PortReader& reader, bool willReply) {
     PortCoreAdapter& core = HELPER(implementation);
+    if (willReply) core.alertOnRpc();
+    core.alertOnRead();
     if (core.isInterrupted()) return false;
     return core.read(reader,willReply);
 }
@@ -570,11 +591,13 @@ bool Port::replyAndDrop(PortWriter& writer) {
 
 void Port::setReader(PortReader& reader) {
     PortCoreAdapter& core = HELPER(implementation);
+    core.alertOnRead();
     core.configReader(reader);
 }
 
 void Port::setReaderCreator(PortReaderCreator& creator) {
     PortCoreAdapter& core = HELPER(implementation);
+    core.alertOnRead();
     core.configReadCreator(creator);
 }
 
@@ -605,11 +628,13 @@ bool Port::getEnvelope(PortReader& envelope) {
 
 int Port::getInputCount() {
     PortCoreAdapter& core = HELPER(implementation);
+    core.alertOnRead();
     return core.getInputCount();
 }
 
 int Port::getOutputCount() {
     PortCoreAdapter& core = HELPER(implementation);
+    core.alertOnWrite();
     return core.getOutputCount();
 }
 

@@ -39,6 +39,8 @@ public:
 
     virtual Contact unregisterName(const ConstString& name);
 
+    virtual Contact updateContact(const Contact& contact);
+
     virtual Contact unregisterContact(const Contact& contact);
 
     virtual bool setProperty(const ConstString& name, const ConstString& key, 

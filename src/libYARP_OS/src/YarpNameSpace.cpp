@@ -66,6 +66,10 @@ Contact YarpNameSpace::registerContact(const Contact& contact) {
     return address.toContact();
 }
 
+Contact YarpNameSpace::updateContact(const Contact& contact) {
+    return Contact();
+}
+
 Contact YarpNameSpace::unregisterName(const char *name) {
     NestedContact nc;
     nc.fromString(name);

@@ -121,6 +121,7 @@ public:
     }
 
     void add(Contactable& contactable);
+    void update(Contactable& contactable);
     void remove(Contactable& contactable);
     Contact query(const char *name, const char *category);
 
@@ -255,6 +256,10 @@ void NodeHelper::add(Contactable& contactable) {
     by_category.insert(std::pair<ConstString,NodeItem>(item.nc.getCategory(),item));
 }
 
+void NodeHelper::update(Contactable& contactable) {
+    NodeItem item = name_cache[&contactable];
+}
+
 void NodeHelper::remove(Contactable& contactable) {
     NodeItem item = name_cache[&contactable];
     name_cache.erase(&contactable);
@@ -336,6 +341,12 @@ Node::~Node() {
 void Node::add(Contactable& contactable) {
     HELPER(this).mutex.lock();
     HELPER(this).add(contactable);
+    HELPER(this).mutex.unlock();
+}
+
+void Node::update(Contactable& contactable) {
+    HELPER(this).mutex.lock();
+    HELPER(this).update(contactable);
     HELPER(this).mutex.unlock();
 }
 

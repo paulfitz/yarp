@@ -287,6 +287,17 @@ Contact MultiNameSpace::registerContact(const Contact& contact) {
     return result;
 }
 
+
+Contact MultiNameSpace::updateContact(const Contact& contact) {
+    SpaceList lst = HELPER(this).getAll();
+    Contact result;
+    for (int i=0; i<(int)lst.size(); i++) {
+        Contact iresult = lst[i]->updateContact(contact);
+        if (i==0) result = iresult;
+    }
+    return result;
+}
+
 Contact MultiNameSpace::unregisterName(const ConstString& name) {
     SpaceList lst = HELPER(this).getAll();
     Contact result;

@@ -40,6 +40,8 @@ public:
 
     virtual Contact unregisterName(const ConstString& name) = 0;
 
+    virtual Contact updateContact(const Contact& contact) = 0;
+
     virtual Contact unregisterContact(const Contact& contact) = 0;
 
     virtual bool setProperty(const ConstString& name, const ConstString& key,
