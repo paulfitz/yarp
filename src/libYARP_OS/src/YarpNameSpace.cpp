@@ -54,13 +54,21 @@ Contact YarpNameSpace::registerContact(const Contact& contact) {
         NestedContact nc;
         nc.fromString(address.getRegName().c_str());
         ConstString cat = nc.getCategory();
-        if (cat == "+" || cat== "-") {
+        if (nc.getNestedName()!="") {
+            //bool service = (cat.find("1") != ConstString::npos);
+            bool publish = (cat.find("+") != ConstString::npos);
+            bool subscribe = (cat.find("-") != ConstString::npos);
             ContactStyle style;
             Contact c1 = Contact::byName(nc.getFullName());
             Contact c2 = Contact::byName(ConstString("topic:/") + nc.getNestedName());
-            connectPortToTopic((cat=="+")?c1:c2,
-                               (cat=="+")?c2:c1,
-                               style);
+            if (subscribe) {
+                style.persistenceType = ContactStyle::END_WITH_TO_PORT;
+                connectPortToTopic(c2,c1,style);
+            }
+            if (publish) {
+                style.persistenceType = ContactStyle::END_WITH_FROM_PORT;
+                connectPortToTopic(c1,c2,style);
+            }
         }
     }
     return address.toContact();
@@ -74,13 +82,19 @@ Contact YarpNameSpace::unregisterName(const char *name) {
     NestedContact nc;
     nc.fromString(name);
     ConstString cat = nc.getCategory();
-    if (cat == "+" || cat== "-") {
+    if (nc.getNestedName()!="") {
+        //bool service = (cat.find("1") != ConstString::npos);
+        bool publish = (cat.find("+") != ConstString::npos);
+        bool subscribe = (cat.find("-") != ConstString::npos);
         ContactStyle style;
         Contact c1 = Contact::byName(nc.getFullName());
         Contact c2 = Contact::byName(ConstString("topic:/") + nc.getNestedName());
-        disconnectPortFromTopic((cat=="+")?c1:c2,
-                                (cat=="+")?c2:c1,
-                                style);
+        if (subscribe) {
+            disconnectPortFromTopic(c2,c1,style);
+        }
+        if (publish) {
+            disconnectPortFromTopic(c1,c2,style);
+        }
     }
     NameClient& nic = HELPER(this);
     return nic.unregisterName(name);
