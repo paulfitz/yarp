@@ -38,8 +38,8 @@ void NodeTest::basicNodeTest() {
     Node n;
     Port p1;
     Port p2;
-    p1.open("/test#/p1");
-    p2.open("/test#/p2");
+    p1.open("/test=/p1");
+    p2.open("/test=/p2");
     n.add(p1);
     n.add(p2);
     Contact c = n.query("/p1");
@@ -58,9 +58,9 @@ void NodeTest::basicNodesTest() {
     Port p1;
     Port p2;
     Port p3;
-    p1.open("/test#/p1");
-    p2.open("/test#/p2");
-    p3.open("/test2#/p3");
+    p1.open("/test=/p1");
+    p2.open("/test=/p2");
+    p3.open("/test2=/p3");
     n.add(p1);
     n.add(p2);
     n.add(p3);
@@ -74,7 +74,7 @@ void NodeTest::basicNodesTest() {
     Network::connect(n.query("/p1").getName(),n.query("/p3").getName());
     Network::sync(n.query("/p1").getName());
     Network::sync(n.query("/p3").getName());
-    checkTrue(Network::isConnected("/test#/p1","/test2#/p3"),"good contacts");
+    checkTrue(Network::isConnected("/test=/p1","/test2=/p3"),"good contacts");
 
     n.remove(p3);
     n.remove(p2);
@@ -96,8 +96,8 @@ void NodeTest::builtinNodeTest() {
         checkFalse(NetworkBase::exists("/test"),"node does not exist yet");
         Port p1;
         Port p2;
-        p1.open("/test#/p1");
-        p2.open("/test#/p2");
+        p1.open("/test=/p1");
+        p2.open("/test=/p2");
         checkTrue(NetworkBase::exists("/test"),"node exists now");
     }
     NameClient::getNameClient().getNodes().clear();
@@ -108,8 +108,8 @@ void NodeTest::basicApiTest() {
     NameClient::getNameClient().getNodes().clear();
     Port p1;
     Port p2;
-    p1.open("/test#/p1");
-    p2.open("/test#/p2");
+    p1.open("/test=/p1");
+    p2.open("/test=/p2");
     Bottle cmd, reply;
     cmd.fromString("getSubscriptions dummy");
     NetworkBase::write(Contact::byName("/test"),cmd,reply);
@@ -132,8 +132,8 @@ void NodeTest::portTopicCombo() {
     NameClient::getNameClient().getNodes().clear();
     Port p1;
     Port p2;
-    p1.open("/test#+/p1");
-    p2.open("/test#-/p1");
+    p1.open("/test=+/p1");
+    p2.open("/test=-/p1");
     // topic-based connections are asynchronous
     for (int i=0; i<100; i++) {
         if (NetworkBase::isConnected(p1.getName(),

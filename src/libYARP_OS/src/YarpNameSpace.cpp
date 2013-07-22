@@ -52,7 +52,7 @@ Contact YarpNameSpace::registerContact(const Contact& contact) {
                                        Address::fromContact(contact));
     if (address.isValid()) {
         NestedContact nc;
-        nc.fromString(contact.getName().c_str());
+        nc.fromString(address.getRegName().c_str());
         ConstString cat = nc.getCategory();
         if (cat == "+" || cat== "-") {
             ContactStyle style;
