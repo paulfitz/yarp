@@ -221,6 +221,9 @@ public:
      */
     virtual void setReader(PortReader& reader) = 0;
 
+    virtual void setReadOnly() {}
+    virtual void setWriteOnly() {}
+
     virtual Type getType() = 0;
 };
 

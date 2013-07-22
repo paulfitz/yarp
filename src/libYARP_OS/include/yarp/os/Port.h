@@ -261,6 +261,11 @@ public:
     int getVerbosity();
 
     virtual Type getType();
+
+    virtual void setReadOnly();
+
+    virtual void setWriteOnly();
+
 private:
     void *implementation;
 

@@ -44,7 +44,11 @@ private:
     bool usedForRead;
     bool usedForWrite;
     bool usedForRpc;
+
 public:
+    bool commitToRead;
+    bool commitToWrite;
+
     PortCoreAdapter(Port& owner) :
         owner(owner), stateMutex(1), readDelegate(NULL), writeDelegate(NULL),
         readResult(false),
@@ -61,7 +65,9 @@ public:
         checkedType(false),
         usedForRead(false),
         usedForWrite(false),
-        usedForRpc(false)
+        usedForRpc(false),
+        commitToRead(false),
+        commitToWrite(false)
     {
     }
 
@@ -82,12 +88,23 @@ public:
     }
 
     void alertOnRead() {
+        usedForRead = true;
     }
 
     void alertOnWrite() {
+        usedForWrite = true;
     }
 
     void alertOnRpc() {
+        usedForRpc = true;
+    }
+
+    void setReadOnly() {
+        commitToRead = true;
+    }
+
+    void setWriteOnly() {
+        commitToWrite = true;
     }
 
     void finishReading() {
@@ -338,9 +355,35 @@ bool Port::open(const Contact& contact, bool registerName,
             }
         }
     }
+    PortCoreAdapter *currentCore = &(HELPER(implementation));
+    if (currentCore!=NULL) {
+        NestedContact nc;
+        nc.fromString(n);
+        if (nc.getNestedName()!="") {
+            if (nc.getCategory()=="") {
+                // we need to add in a category
+                ConstString cat = "";
+                if (currentCore->commitToRead) {
+                    cat = "-";
+                } else if (currentCore->commitToWrite) {
+                    cat = "+";
+                }
+                if (cat!="") {
+                    contact2 = contact2.addName(nc.getNodeName() +
+                                                "=" +
+                                                cat +
+                                                nc.getNestedName());
+                } else {
+                    YARP_SPRINTF1(Logger::get(),error,
+                                  "Port '%s' does not have a defined I/O direction",
+                                  n.c_str());
+                    return false;
+                }
+            }
+        }
+    }
 
     // Allow for open() to be called safely many times on the same Port
-    PortCoreAdapter *currentCore = &(HELPER(implementation));
     if (currentCore->isOpened()) {
         PortCoreAdapter *newCore = new PortCoreAdapter(*this);
         YARP_ASSERT(newCore!=NULL);
@@ -694,3 +737,10 @@ Type Port::getType() {
     return HELPER(implementation).getType();
 }
 
+void Port::setReadOnly() {
+    return HELPER(implementation).setReadOnly();
+}
+
+void Port::setWriteOnly() {
+    return HELPER(implementation).setWriteOnly();
+}

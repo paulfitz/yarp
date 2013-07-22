@@ -209,6 +209,8 @@ public:
      */
     static Contact registerContact(const Contact& contact);
 
+    static Contact updateContact(const Contact& contact);
+
     /**
      * Removes the registration for a name from the name server.
      * @param name the name to unregister

@@ -180,11 +180,11 @@ Contact AllocatorOnTriples::completePortName(const Contact& c) {
         t.setNsNameValue("alloc","tmpid","*");
         context.setRid(db->find(t,NULL));
         if (tmpid>=1 && tmpid<=YARP_TOP_ELEMENT) {
-            string name = elements[tmpid-1].name;
+            string name = elements[tmpid-1].code;
             std::transform(name.begin(),name.end(),name.begin(),::tolower);
-            sprintf(buf,"/port/%s", name.c_str());
+            sprintf(buf,"/atom/%s", name.c_str());
         } else {
-            sprintf(buf,"/tmp/port/%u", tmpid);
+            sprintf(buf,"/atom/%u", tmpid);
         }
         name = buf;
     }

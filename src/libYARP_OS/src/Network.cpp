@@ -619,6 +619,11 @@ Contact NetworkBase::registerContact(const Contact& contact) {
     return getNameSpace().registerContact(contact);
 }
 
+Contact NetworkBase::updateContact(const Contact& contact) {
+    return getNameSpace().updateContact(contact);
+}
+
+
 Contact NetworkBase::unregisterName(const ConstString& name) {
     return getNameSpace().unregisterName(name);
 }
