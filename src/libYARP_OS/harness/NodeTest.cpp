@@ -28,6 +28,7 @@ public:
     void builtinNodeTest();
     void basicApiTest();
     void portTopicCombo();
+    void directionTest();
 
     virtual void runTests();
 };
@@ -126,6 +127,18 @@ void NodeTest::basicApiTest() {
     NameClient::getNameClient().getNodes().clear();
 }
 
+static bool waitConnect(const ConstString& n1,
+                        const ConstString& n2,
+                        double timeout) {
+    double start = Time::now();
+    while (Time::now()-start<timeout) {
+        if (NetworkBase::isConnected(n1,n2)) {
+            return true;
+        }
+        Time::delay(0.1);
+    }
+    return false;
+}
 
 void NodeTest::portTopicCombo() {
     report(0,"check port node combo");
@@ -134,16 +147,23 @@ void NodeTest::portTopicCombo() {
     Port p2;
     p1.open("/test=+/p1");
     p2.open("/test=-/p1");
-    // topic-based connections are asynchronous
-    for (int i=0; i<100; i++) {
-        if (NetworkBase::isConnected(p1.getName(),
-                                     p2.getName())) break;
-        Time::delay(0.1);
-               
-    }
-    checkTrue(NetworkBase::isConnected(p1.getName(),
-                                       p2.getName()), "auto connect working");
+    checkTrue(waitConnect(p1.getName(),p2.getName(),20), 
+              "auto connect working");
     NameClient::getNameClient().getNodes().clear();
+}
+
+void NodeTest::directionTest() {
+    report(0,"direction test");
+    NameClient::getNameClient().getNodes().clear();
+    Port p1;
+    Port p2;
+    p1.setWriteOnly();
+    p2.setReadOnly();
+    p1.open("/node1=/a/topic");
+    p2.open("/node2=/a/topic");
+    checkTrue(waitConnect(p1.getName(),p2.getName(),20), 
+              "direction working");
+    NameClient::getNameClient().getNodes().clear();    
 }
 
 void NodeTest::runTests() {
@@ -154,6 +174,7 @@ void NodeTest::runTests() {
     builtinNodeTest();
     basicApiTest();
     portTopicCombo();
+    directionTest();
     NetworkBase::setLocalMode(false);
 }
 
