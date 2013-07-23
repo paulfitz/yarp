@@ -163,6 +163,17 @@ void NodeTest::directionTest() {
     p2.open("/node2=/a/topic");
     checkTrue(waitConnect(p1.getName(),p2.getName(),20), 
               "direction working");
+    Port p3, p4;
+    p3.setWriteOnly();
+    p4.setReadOnly();
+    p3.open("/node3=/a/topic");
+    p4.open("/node4=/a/topic");
+    checkTrue(waitConnect(p1.getName(),p4.getName(),20), 
+              "p1->p4 ok");
+    checkTrue(waitConnect(p3.getName(),p4.getName(),20), 
+              "p3->p4 ok");
+    checkTrue(waitConnect(p3.getName(),p2.getName(),20), 
+              "p3->p2 ok");
     NameClient::getNameClient().getNodes().clear();    
 }
 
