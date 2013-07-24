@@ -108,11 +108,21 @@ size_t ConstString::length() const {
 }
 
 bool ConstString::operator <=(const ConstString& alt) const {
+#ifdef YARP_USE_STL_STRING
     return HELPER(implementation) <= HELPER(alt.implementation);
+#else
+    return HELPER(implementation) < HELPER(alt.implementation) ||
+        HELPER(implementation) == HELPER(alt.implementation);
+#endif
 }
 
 bool ConstString::operator >=(const ConstString& alt) const {
+#ifdef YARP_USE_STL_STRING
     return HELPER(implementation) >= HELPER(alt.implementation);
+#else
+    return HELPER(implementation) > HELPER(alt.implementation) ||
+        HELPER(implementation) == HELPER(alt.implementation);
+#endif
 }
 
 ConstString ConstString::operator + (char ch) const {

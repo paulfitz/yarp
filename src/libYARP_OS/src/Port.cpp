@@ -31,6 +31,7 @@ private:
     Port& owner;
     SemaphoreImpl stateMutex;
     PortReader *readDelegate;
+    PortReader *permanentReadDelegate;
     PortWriter *writeDelegate;
     //PortReaderCreator *readCreatorDelegate;
     bool readResult, readActive, readBackground, willReply, closed, opened;
@@ -50,7 +51,10 @@ public:
     bool commitToWrite;
 
     PortCoreAdapter(Port& owner) :
-        owner(owner), stateMutex(1), readDelegate(NULL), writeDelegate(NULL),
+        owner(owner), stateMutex(1), 
+        readDelegate(NULL), 
+        permanentReadDelegate(NULL), 
+        writeDelegate(NULL),
         readResult(false),
         readActive(false),
         readBackground(false),
@@ -132,6 +136,11 @@ public:
     }
 
     virtual bool read(ConnectionReader& reader) {
+        if (permanentReadDelegate!=NULL) {
+            bool result = permanentReadDelegate->read(reader);
+            return result;
+        }
+
         // called by comms code
         readBlock.wait();
 
@@ -258,6 +267,7 @@ public:
         readActive = true;
         readBackground = true;
         readDelegate = &reader;
+        permanentReadDelegate = &reader;
         checkType(reader);
         consume.post(); // just do this once
         stateMutex.post();
