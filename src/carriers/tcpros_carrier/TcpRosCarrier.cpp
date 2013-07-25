@@ -23,7 +23,7 @@ using namespace yarp::os;
 using namespace yarp::sig;
 using namespace std;
 
-#define dbg_printf if (0) printf
+#define dbg_printf if (1) printf
 
 //#define FORCE_ROS_NATIVE
 
@@ -237,7 +237,10 @@ bool TcpRosCarrier::expectSenderSpecifier(ConnectionState& proto) {
 
 bool TcpRosCarrier::write(ConnectionState& proto, SizedWriter& writer) {
     SizedWriter *flex_writer = &writer;
-
+    printf("WRITING\n");
+    writer.write(proto.os());
+    printf("WROTE\n");
+    return proto.os().isOk();
 
     if (raw!=2) {
         // At startup, we check for what kind of messages are going

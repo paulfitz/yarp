@@ -75,7 +75,9 @@ void PortCoreInputUnit::run() {
     
     PortCommand cmd;
     
+        printf("%s %d\n", __FILE__, __LINE__);
     if (autoHandshake) {
+        printf("%s %d\n", __FILE__, __LINE__);
         bool ok = true;
         if (!reversed) {
             ip->open(getName().c_str());
@@ -85,6 +87,7 @@ void PortCoreInputUnit::run() {
                        getOwner().getName()+ " is broken");
             done = true;
         } else {
+        printf("%s %d\n", __FILE__, __LINE__);
             route = ip->getRoute();
 
             // just before going official, tag any lurking inputs from
@@ -101,7 +104,9 @@ void PortCoreInputUnit::run() {
             }
             officialRoute = route;
             setMode();
+        printf("%s %d\n", __FILE__, __LINE__);
             getOwner().reportUnit(this,true);
+        printf("%s %d\n", __FILE__, __LINE__);
 
             String msg = String("Receiving input from ") + 
                 route.getFromName() + " to " + route.getToName() + 
@@ -117,6 +122,7 @@ void PortCoreInputUnit::run() {
             } else {
                 YARP_DEBUG(Logger::get(),msg);
             }
+        printf("%s %d\n", __FILE__, __LINE__);
             
             // Report the new connection
             PortInfo info;
@@ -134,9 +140,12 @@ void PortCoreInputUnit::run() {
                 wasNoticed = true;
             }
         }
+        printf("%s %d\n", __FILE__, __LINE__);
         
     } else {
+        printf("%s %d\n", __FILE__, __LINE__);
         bool ok = ip->open(""); // anonymous connection
+        printf("%s %d\n", __FILE__, __LINE__);
         route = ip->getRoute();
         if (!ok) {
             done = true;
@@ -156,6 +165,7 @@ void PortCoreInputUnit::run() {
             done = true;
         }
     }
+        printf("%s %d\n", __FILE__, __LINE__);
     
     if (closing) {
         done = true;
@@ -164,29 +174,40 @@ void PortCoreInputUnit::run() {
     void *id = (void *)this;
     
     while (!done) {
+        printf("%s %d %s\n", __FILE__, __LINE__, route.toString().c_str());
         ConnectionReader& br = ip->beginRead();
+        printf("%s %d %s\n", __FILE__, __LINE__, route.toString().c_str());
             
         if (br.getReference()!=NULL) {
             //printf("HAVE A REFERENCE\n");
             if (localReader!=NULL) {
+        printf("%s %d %s\n", __FILE__, __LINE__, route.toString().c_str());
                 bool ok = localReader->read(br);
+        printf("%s %d %s\n", __FILE__, __LINE__, route.toString().c_str());
                 if (!br.isActive()) { done = true; break; }
                 if (!ok) continue;
             } else {
+        printf("%s %d %s\n", __FILE__, __LINE__, route.toString().c_str());
                 PortManager& man = getOwner();
+        printf("%s %d %s\n", __FILE__, __LINE__, route.toString().c_str());
                 bool ok = man.readBlock(br,id,NULL);
+        printf("%s %d %s\n", __FILE__, __LINE__, route.toString().c_str());
                 if (!br.isActive()) { done = true; break; }
                 if (!ok) continue;
             }
             //printf("DONE WITH A REFERENCE\n");
             if (ip!=NULL) {
+        printf("%s %d %s\n", __FILE__, __LINE__, route.toString().c_str());
                 ip->endRead();
+        printf("%s %d %s\n", __FILE__, __LINE__, route.toString().c_str());
             }
             continue;
         }
             
         if (autoHandshake&&(ip->getConnection().canEscape())) {
+        printf("%s %d %s\n", __FILE__, __LINE__, route.toString().c_str());
             bool ok = cmd.read(br);
+        printf("%s %d %s\n", __FILE__, __LINE__, route.toString().c_str());
             if (!br.isActive()) { done = true; break; }
             if (!ok) continue;
         } else {
@@ -268,12 +289,18 @@ void PortCoreInputUnit::run() {
                         ip->setEnvelope(env2);
                     }
                 }
+        printf("%s %d %s\n", __FILE__, __LINE__, route.toString().c_str());
                 if (localReader) {
+        printf("%s %d %s\n", __FILE__, __LINE__, route.toString().c_str());
                     localReader->read(br);
+        printf("%s %d %s\n", __FILE__, __LINE__, route.toString().c_str());
                     if (!br.isActive()) { done = true; break; }
                 } else {
+        printf("%s %d %s\n", __FILE__, __LINE__, route.toString().c_str());
                     if (ip->getReceiver().acceptIncomingData(br)) {
+        printf("%s %d %s\n", __FILE__, __LINE__, route.toString().c_str());
                         man.readBlock(ip->getReceiver().modifyIncomingData(br),id,os);
+        printf("%s %d %s\n", __FILE__, __LINE__, route.toString().c_str());
                     } else {
                         skipIncomingData(br);
                     }

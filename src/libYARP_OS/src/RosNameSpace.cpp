@@ -31,22 +31,23 @@ Contact RosNameSpace::getNameServerContact() const {
 }
 
 Contact RosNameSpace::queryName(const ConstString& name) {
-    ConstString full = name;
-    ConstString node = full;
-    ConstString srv = "";
-    size_t srv_idx = full.find("#");
-    if (srv_idx!=ConstString::npos) {
-        node = full.substr(0,srv_idx);
-        srv = full.substr(srv_idx+1,full.length());
-    }
+    printf("RosNameSpace::queryName(\"%s\")\n", name);
+    return Contact();
 
+    /*
+    NestedContact nc;
+    nc.fromString(name);
+
+    ConstString node = nc.getNodeName();
+    ConstString topic = nc.getNestedName();
     Bottle cmd,reply;
     cmd.addString("lookupNode");
     cmd.addString("dummy_id");
     cmd.addString(toRosNodeName(node));
+    printf("PRE Looking up %s -> %s\n", node.c_str(), reply.toString().c_str());
     NetworkBase::write(getNameServerContact(),
                        cmd, reply);
-    Contact contact;
+    printf("Looking up %s -> %s\n", node.c_str(), reply.toString().c_str());
     if (reply.get(0).asInt()!=1) {
         cmd.clear();
         reply.clear();
@@ -57,54 +58,53 @@ Contact RosNameSpace::queryName(const ConstString& name) {
                            cmd, reply);
     }
     contact = Contact::fromString(reply.get(2).asString());
-    // unfortunate differences in labeling carriers
-    if (contact.getCarrier()=="rosrpc") {
-        contact = contact.addCarrier(ConstString("rossrv+service.") + name + "+raw.2");
-    } else {
+    if (contact.isValid()) {
         contact = contact.addCarrier("xmlrpc");
     }
-    contact = contact.addName(name);
+    printf("  GOT %s\n", contact.toString().c_str());
+    if (topic=="") {
+        return contact;
+    }
 
-    if (srv == "") return contact;
-
-    // we need to go a step further and find a service
-
+    printf("  GOING DEEPER for %s\n", contact.toString().c_str());
     contact = contact.addName("");
-    //printf("Working with %s\n", contact.toString().c_str());
     Bottle req;
     reply.clear();
     req.addString("requestTopic");
     req.addString("dummy_id");
-    req.addString(srv);
+    req.addString(topic);
     Bottle& lst = req.addList();
     Bottle& sublst = lst.addList();
     sublst.addString("TCPROS");
-    if (!NetworkBase::write(contact,req,reply,false,true)) {
-        fprintf(stderr,"Failure looking up service %s: %s\n", srv.c_str(), reply.toString().c_str());
+    printf("Looking up %s\n", req.toString().c_str());
+    if (!NetworkBase::write(contact,req,reply,false,false)) {
+        fprintf(stderr,"Failure looking up topic %s: %s\n", topic.c_str(), reply.toString().c_str());
         return Contact();
     }
+    printf("Looking up %s -> %s\n", req.toString().c_str(), reply.toString().c_str());
     Bottle *pref = reply.get(2).asList();
     if (pref==NULL) {
-        fprintf(stderr,"Failure looking up service %s: expected list of protocols\n", srv.c_str());
+        fprintf(stderr,"Failure looking up service %s: expected list of protocols\n", topic.c_str());
         return Contact();
     }
     if (pref->get(0).asString()!="TCPROS") {
         if (pref->get(0).asString() == "faultString") {
-            fprintf(stderr,"Failure looking up service %s: %s\n", srv.c_str(),
+            fprintf(stderr,"Failure looking up topic %s: %s\n", topic.c_str(),
                     pref->toString().c_str());
         } else {
-            fprintf(stderr,"Failure looking up service %s: unsupported protocol %s\n", srv.c_str(),
+            fprintf(stderr,"Failure looking up topic %s: unsupported protocol %s\n", topic.c_str(),
                     pref->get(0).asString().c_str());
         }
         return Contact();
     }
     Value hostname2 = pref->get(1);
     Value portnum2 = pref->get(2);
-    contact = contact.addSocket((ConstString("rossrv+service.")+srv + "+raw.2").c_str(),
+    contact = contact.addSocket(ConstString("tcpros+role.pub+topic.") + topic,
                                 hostname2.asString().c_str(),
                                 portnum2.asInt());
 
     return contact;
+    */
 }
 
 Contact RosNameSpace::registerName(const ConstString& name) {
@@ -121,76 +121,28 @@ Contact RosNameSpace::registerContact(const Contact& contact) {
     //printf("CONTACT %s category %s\n", nc.getFullName().c_str(),
     //nc.getCategory().c_str());
     ConstString cat = nc.getCategory();
-    if (cat == "+" || cat== "-") {
-        Bottle cmd, reply;
-        cmd.clear();
-        cmd.addString((cat=="+")?"registerPublisher":"registerSubscriber");
-        cmd.addString(toRosNodeName(nc.getNodeName()));
-        cmd.addString(nc.getNestedName());
-        cmd.addString(nc.getTypeNameStar());
-        Nodes& nodes = NameClient::getNameClient().getNodes();
-        Contact c = rosify(nodes.getParent(contact.getName()));
-        //Contact c = rosify(contact);
-        cmd.addString(c.toString());
-        bool ok = NetworkBase::write(getNameServerContact(),
-                                     cmd, reply);
-        printf("Wrote [%s] got [%s]\n", cmd.toString().c_str(),
-               reply.toString().c_str());
-        if (!ok) return Contact();
+    if (nc.getNestedName()!="") {
+        if (cat == "+" || cat== "-") {
+            Bottle cmd, reply;
+            cmd.clear();
+            cmd.addString((cat=="+")?"registerPublisher":"registerSubscriber");
+            cmd.addString(toRosNodeName(nc.getNodeName()));
+            cmd.addString(nc.getNestedName());
+            cmd.addString(nc.getTypeNameStar());
+            Nodes& nodes = NameClient::getNameClient().getNodes();
+            Contact c = rosify(nodes.getParent(contact.getName()));
+            //Contact c = rosify(contact);
+            cmd.addString(c.toString());
+            bool ok = NetworkBase::write(getNameServerContact(),
+                                         cmd, reply);
+            printf("Wrote [%s] got [%s]\n", cmd.toString().c_str(),
+                   reply.toString().c_str());
+            if (!ok) return Contact();
+        }
+        
+        return contact;
     }
-
     return contact;
-    /*
-    ConstString full = contact.getName();
-    ConstString name = full;
-    size_t pub_idx = name.find("+#");
-    size_t sub_idx = name.find("-#");
-
-    ConstString node = "";
-    ConstString pub = "";
-    ConstString sub = "";
-    if (pub_idx!=ConstString::npos) {
-        node = name.substr(0,pub_idx);
-        pub = name.substr(pub_idx+2,name.length());
-        YARP_SPRINTF1(Logger::get(),debug,"Publish to %s",pub.c_str());
-    }
-    if (sub_idx!=ConstString::npos) {
-        node = name.substr(0,sub_idx);
-        sub = name.substr(sub_idx+2,name.length());
-        YARP_SPRINTF1(Logger::get(),debug,"Subscribe to %s",sub.c_str());
-    }
-    if (node=="") {
-        node = name;
-    }
-    YARP_SPRINTF4(Logger::get(),debug,"Name [%s] Node [%s] sub [%s] pub [%s]",
-                  name.c_str(), node.c_str(), sub.c_str(), pub.c_str());
-
-    {
-        Bottle cmd, reply;
-        // for ROS, we fake port name registrations by
-        // registering them as nodes that publish to an arbitrary
-        // topic
-        cmd.clear();
-        cmd.addString("registerPublisher");
-        cmd.addString(toRosNodeName(node));
-        //cmd.addString(toRosNodeName(contact.getName().c_str()));
-        cmd.addString("/yarp/registration");
-        cmd.addString("*");
-        Contact c = rosify(contact);
-        cmd.addString(c.toString());
-        //printf("Writing to %s\n",getNameServerContact().toString().c_str());
-        bool ok = NetworkBase::write(getNameServerContact(),
-                                     cmd, reply);
-        if (!ok) return Contact();
-    }
-
-    if (pub!="") {
-        NetworkBase::connect(node, ConstString("topic:/") + pub);
-    }
-    if (sub!="") {
-        NetworkBase::connect(ConstString("topic:/") + sub, node);
-    }
-    */
 }
 
 Contact RosNameSpace::updateContact(const Contact& contact) {
@@ -201,46 +153,33 @@ Contact RosNameSpace::updateContact(const Contact& contact) {
 Contact RosNameSpace::unregisterName(const ConstString& rname) {
     NestedContact nc;
     nc.fromString(rname);
-    printf("CONTACT %s category %s\n", nc.getFullName().c_str(),
+    printf("UNREGISTER %s category %s\n", nc.getFullName().c_str(),
            nc.getCategory().c_str());
     ConstString cat = nc.getCategory();
-    if (cat == "+" || cat== "-") {
-        Bottle cmd, reply;
-        cmd.clear();
-        cmd.addString((cat=="+")?"unregisterPublisher":"unregisterSubscriber");
-        cmd.addString(toRosNodeName(nc.getNodeName()));
-        cmd.addString(nc.getNestedName());
-        Nodes& nodes = NameClient::getNameClient().getNodes();
-        Contact c = rosify(nodes.getParent(rname));
-        cmd.addString(c.toString());
-        bool ok = NetworkBase::write(getNameServerContact(),
-                                     cmd, reply);
-        printf("Wrote [%s] got [%s]\n", cmd.toString().c_str(),
-               reply.toString().c_str());
-        if (!ok) return Contact();
+
+    if (nc.getNestedName()!="") {
+        if (cat == "+" || cat== "-") {
+            Bottle cmd, reply;
+            cmd.clear();
+            cmd.addString((cat=="+")?"unregisterPublisher":"unregisterSubscriber");
+            cmd.addString(toRosNodeName(nc.getNodeName()));
+            cmd.addString(nc.getNestedName());
+            Nodes& nodes = NameClient::getNameClient().getNodes();
+            Contact c = rosify(nodes.getParent(rname));
+            cmd.addString(c.toString());
+            bool ok = NetworkBase::write(getNameServerContact(),
+                                         cmd, reply);
+            printf("Wrote [%s] got [%s]\n", cmd.toString().c_str(),
+                   reply.toString().c_str());
+            if (!ok) return Contact();
+        }
     }
-    
+
     return Contact();
 }
 
 Contact RosNameSpace::unregisterContact(const Contact& contact) {
     return Contact();
-
-    /*
-    Bottle cmd,reply;
-    cmd.addString("unregisterSubscriber");
-    cmd.addString(contact.getName());
-    cmd.addString("/yarp/registration");
-    Contact c = Contact::bySocket("http",contact.getHost().c_str(),
-                                  contact.getPort());
-    cmd.addString(c.toString());
-    //printf("Writing to %s\n",getNameServerContact().toString().c_str());
-    bool ok = NetworkBase::write(getNameServerContact(),
-                                 cmd, reply);
-    if (!ok) return Contact();
-    //printf("unregistration: sent %s, got %s\n", cmd.toString().c_str(), reply.toString().c_str());
-    return Contact();
-    */
 }
 
 bool RosNameSpace::setProperty(const ConstString& name,

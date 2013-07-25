@@ -208,15 +208,18 @@ public:
             na.fail("Cannot find topic");
             return;
         }
+        c = c.addName("");
         // just pass the message along, YARP ports know what to do with it
         ContactStyle style;
         style.admin = true;
+        style.carrier = "tcp";
         Bottle reply;
         if (!NetworkBase::write(c,na.request,reply,style)) {
             na.fail("Cannot communicate with local port");
             return;
         }
         na.fromExternal(reply);
+        printf("DONE with passing on publisherUpdate\n");
     }
 
     void requestTopic(NodeArgs& na) {
@@ -280,9 +283,9 @@ bool NodeHelper::read(ConnectionReader& reader) {
     if (!reader.isValid()) return false;
     NodeArgs na;
     na.request.read(reader);
-    //printf("NODE %s >>> %s\n", 
-    //name.c_str(),
-    //na.request.toString().c_str());
+    printf("NODE %s >>> %s\n", 
+           name.c_str(),
+           na.request.toString().c_str());
     ConstString key = na.request.get(0).asString();
     na.args = na.request.tail().tail();
     if (key=="getBusStats") {
@@ -316,6 +319,9 @@ bool NodeHelper::read(ConnectionReader& reader) {
         full.addInt(na.code);
         full.addString(na.msg);
         full.addList() = na.reply;
+        printf("NODE %s <<< %s\n", 
+               name.c_str(),
+               full.toString().c_str());
         full.write(*reader.getWriter());
     }
     return true;

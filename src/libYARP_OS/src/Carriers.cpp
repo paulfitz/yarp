@@ -128,7 +128,8 @@ Carrier *Carriers::chooseCarrier(const String *name, const Bytes *header,
         size_t i = s.find("+");
         if (i!=String::npos) {
             s[i] = '\0';
-            s = s.c_str();
+            String tmp = s;
+            s = tmp.c_str();
             name = &s;
         }
     }

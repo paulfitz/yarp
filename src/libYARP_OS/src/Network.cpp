@@ -701,7 +701,21 @@ bool NetworkBase::write(const Contact& contact,
             return false;
         }
 
-        bool ok = port.write(cmd,reply);
+        DummyConnector con;
+        cmd.write(con.getWriter());
+        Bottle in, out;
+        in.read(con.getReader());
+        bool ok = port.write(cmd,out);
+        out.write(con.getCleanWriter());
+        reply.read(con.getReader());
+
+        YARP_SPRINTF3(Logger::get(),
+                      info,
+                      "NETWORK WROTE: %s: [%s] -> [%s]",
+                      ec.toString().c_str(),
+                      in.toString().c_str(),
+                      out.toString().c_str());
+
         return ok;
     }
 

@@ -94,6 +94,7 @@ public:
         timeout = -1;
         verbosity = 1;
         counter = 1;
+        pupping = false;
     }
 
     /**
@@ -402,6 +403,7 @@ private:
     bool interruptible;
     bool interrupted;
     bool manual;
+    bool pupping;
     int events;
     int connectionListeners;
     int inputCount, outputCount, dataOutputCount;

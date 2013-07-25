@@ -23,6 +23,12 @@ using namespace std;
 #define dbg_printf if (0) printf
 
 YARP_SSIZE_T TcpRosStream::read(const Bytes& b) {
+    printf("READING\n");
+    ssize_t result = delegate->getInputStream().read(b);
+    printf("READ\n");
+    return result;
+
+    // Not used right now, during transition
     if (kind!="") {
       return twiddlerReader.read(b);
     }

@@ -1730,6 +1730,7 @@ public:
     }
 
     virtual bool read(ConnectionReader& reader) {
+        printf("Reading, I'm reading, I hope you like reading too\n");
         BottleImpl bot;
         if (!reader.isValid()) {
             done.post();

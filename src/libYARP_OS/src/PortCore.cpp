@@ -1036,6 +1036,7 @@ void PortCore::report(const PortInfo& info) {
 
 bool PortCore::readBlock(ConnectionReader& reader, void *id, OutputStream *os) {
     bool result = true;
+        printf("%s %d %s\n", __FILE__, __LINE__, getName().c_str());
     // pass the data on out
 
     // we are in the context of one of the input threads,
@@ -1065,7 +1066,12 @@ bool PortCore::readBlock(ConnectionReader& reader, void *id, OutputStream *os) {
             sendHelper(recorder,PORTCORE_SEND_LOG);
         } else {
             // YARP is not needed as a middleman
+        printf("%s %d %s\n", __FILE__, __LINE__, getName().c_str());
+        printf("sending %ld to %ld\n",
+               (long int)(&reader),
+               (long int)(this->reader));
             result = this->reader->read(reader);
+        printf("%s %d %s\n", __FILE__, __LINE__, getName().c_str());
         }
 
         interruptible = true;
@@ -1615,9 +1621,24 @@ bool PortCore::adminBlock(ConnectionReader& reader, void *id,
 
     case VOCAB4('r','p','u','p'):
         {
+            bool need_to_wait = true;
+            while (need_to_wait) {
+                // avoid out-of-order processing of ROS publisher updates
+                stateMutex.wait();
+                need_to_wait = pupping;
+                if (!need_to_wait) {
+                    pupping = true;
+                }
+                stateMutex.post();
+                if (need_to_wait) {
+                    printf("publisherUpdate pending...\n");
+                    Time::delay(0.5);
+                }
+            }
+
             YARP_SPRINTF1(log,debug,
                           "publisherUpdate! --> %s", cmd.toString().c_str());
-            //printf("publisherUpdate! --> %s\n", cmd.toString().c_str());
+            printf("publisherUpdate! --> %s\n", cmd.toString().c_str());
             ConstString topic = cmd.get(2).asString();
             Bottle *pubs = cmd.get(3).asList();
             if (pubs!=NULL) {
@@ -1642,6 +1663,8 @@ bool PortCore::adminBlock(ConnectionReader& reader, void *id,
                         }
                     }
                 }
+                stateMutex.post();
+
                 for (int i=0; i<pubs->size(); i++) {
                     ConstString pub = pubs->get(i).asString();
                     if (!present.check(pub)) {
@@ -1688,6 +1711,7 @@ bool PortCore::adminBlock(ConnectionReader& reader, void *id,
                                               portnum);
                             }
                             if (portnum!=0) {
+                                stateMutex.post();
                                 Contact addr(hostname.c_str(),portnum);
                                 OutputProtocol *op = NULL;
                                 Route r = Route(getName(),
@@ -1712,10 +1736,13 @@ bool PortCore::adminBlock(ConnectionReader& reader, void *id,
                                 unit->setPupped(true,pub);
                                 unit->start();
                                 units.push_back(unit);
+                                stateMutex.post();
                             }
                         }
                     }
                 }
+                stateMutex.wait();
+                pupping = false;
                 stateMutex.post();
             }
             result.addInt(1);
