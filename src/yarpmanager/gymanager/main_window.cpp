@@ -1,6 +1,6 @@
 /*
  *  Yarp Modules Manager
- *  Copyright: 2011 (C) Robotics, Brain and Cognitive Sciences - Italian Institute of Technology (IIT)
+ *  Copyright: (C) 2011 Robotics, Brain and Cognitive Sciences - Italian Institute of Technology (IIT)
  *  Authors: Ali Paikan <ali.paikan@iit.it>
  * 
  *  Copy Policy: Released under the terms of the LGPLv2.1 or later, see LGPL.TXT
@@ -109,7 +109,7 @@ MainWindow::MainWindow( yarp::os::Property &config)
         string strPath;
         stringstream appPaths(config.find("apppath").asString().c_str());
         while (getline(appPaths, strPath, ';'))
-        {            
+        {
             trimString(strPath);
             if (!isAbsolute(strPath.c_str()))
                 strPath=basepath+strPath;
@@ -122,6 +122,22 @@ MainWindow::MainWindow( yarp::os::Property &config)
             }
             else
                 lazyManager.addApplications(strPath.c_str()); 
+        }
+    }
+
+    if (config.check("templpath"))
+    {
+        string strPath;
+        stringstream appPaths(config.find("templpath").asString().c_str());
+        while (getline(appPaths, strPath, ';'))
+        {
+            trimString(strPath);
+            if (!isAbsolute(strPath.c_str()))
+                strPath=basepath+strPath;
+
+            if(!loadRecursiveTemplates(strPath.c_str()))
+                    logger->addError("Cannot load the templates from  " + strPath);                   
+
         }
     }
 
@@ -1288,7 +1304,7 @@ void MainWindow::onMenuHelpAbout()
 
     dialog.set_version("1.2");
     dialog.set_copyright(
-            "2011 (C) Robotics, Brain and Cognitive Sciences\n"
+            "(C) 2011 Robotics, Brain and Cognitive Sciences\n"
             "Italian Institute of Technology (IIT)");
     dialog.set_license("Released under the terms of the LGPLv2.1 or later.");
     dialog.set_website("http://wiki.icub.org/yarp");

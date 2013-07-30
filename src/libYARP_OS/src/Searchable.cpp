@@ -30,6 +30,9 @@ yarp::os::Searchable::Searchable() :
         monitor(NULL) {
 }
 
+yarp::os::Searchable::~Searchable() {
+}
+
 bool yarp::os::Searchable::check(const ConstString& txt,
                                  yarp::os::Value *& result,
                                  const ConstString& comment) {

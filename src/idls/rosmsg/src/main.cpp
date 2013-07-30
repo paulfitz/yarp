@@ -1,7 +1,7 @@
 // -*- mode:C++; tab-width:4; c-basic-offset:4; indent-tabs-mode:nil -*-
 
 /*
- * Copyright (C) 2013 iCub Platform
+ * Copyright (C) 2013 iCub Facility
  * Authors: Paul Fitzpatrick
  * CopyPolicy: Released under the terms of the LGPLv2.1 or later, see LGPL.TXT
  *
@@ -62,6 +62,7 @@ int main(int argc, char *argv[]) {
     RosTypeCodeGenYarp gen;
     if (p.check("out")) {
         gen.setTargetDirectory(p.find("out").toString().c_str());
+        env.setTargetDirectory(gen.getTargetDirectory().c_str());
     }
     env.lookForService(is_service);
 

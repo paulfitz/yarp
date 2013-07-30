@@ -1,4 +1,9 @@
 *~
 /build*/
+/bindings/build*/
 *kdev*
 *.orig
+tags
+/author-gpl.txt
+/license-*.txt
+/license_check/

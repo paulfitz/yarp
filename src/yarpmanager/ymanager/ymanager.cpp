@@ -1,6 +1,6 @@
 /*
  *  Yarp Modules Manager
- *  Copyright: 2011 (C) Robotics, Brain and Cognitive Sciences - Italian Institute of Technology (IIT)
+ *  Copyright: (C) 2011 Robotics, Brain and Cognitive Sciences - Italian Institute of Technology (IIT)
  *  Authors: Ali Paikan <ali.paikan@iit.it>
  * 
  *  Copy Policy: Released under the terms of the LGPLv2.1 or later, see LGPL.TXT
@@ -135,7 +135,7 @@ YConsoleManager::YConsoleManager(int argc, char* argv[]) : Manager()
     // Setup resource finder
     yarp::os::ResourceFinder rf;
     rf.setVerbose(false);
-    rf.setDefaultContext("");
+   // rf.setDefaultContext("");
     rf.setDefaultConfigFile(DEF_CONFIG_FILE);
     rf.configure(argc, argv);
 

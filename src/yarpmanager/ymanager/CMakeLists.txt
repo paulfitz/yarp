@@ -1,5 +1,5 @@
 #  Yarp Modules Manager
-#  Copyright: 2011 (C) Robotics, Brain and Cognitive Sciences - Italian Institute of Technology (IIT)
+#  Copyright: (C) 2011 Robotics, Brain and Cognitive Sciences - Italian Institute of Technology (IIT)
 #  Authors: Ali Paikan <ali.paikan@iit.it>
 # 
 #  Copy Policy: Released under the terms of the LGPLv2.1 or later, see LGPL.TXT
@@ -46,9 +46,9 @@ GET_PROPERTY(YARP_TREE_INCLUDE_DIRS TARGET YARP_OS PROPERTY INCLUDE_DIRS)
 
 	ADD_EXECUTABLE(yarpmanager ${folder_source} ${folder_header} )
 	IF (READLINE_FOUND)
-		TARGET_LINK_LIBRARIES(yarpmanager YARP_init YARP_OS YARP_manager ${READLINE_LIBRARY})
+		TARGET_LINK_LIBRARIES(yarpmanager YARP_init YARP_OS YARP_manager ${ACE_LIBRARIES} ${READLINE_LIBRARY})
 	ELSE (READLINE_FOUND)
-		TARGET_LINK_LIBRARIES(yarpmanager YARP_init YARP_OS YARP_manager)
+		TARGET_LINK_LIBRARIES(yarpmanager YARP_init YARP_OS YARP_manager ${ACE_LIBRARIES})
 	ENDIF (READLINE_FOUND)
 
 	INSTALL(TARGETS yarpmanager COMPONENT utilities DESTINATION bin)

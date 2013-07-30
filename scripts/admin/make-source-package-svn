@@ -8,14 +8,10 @@
 
 function prune {
     cd $1
-    for f in scripts/debian scripts/junkyard src/modules/dimax_u2c/blob; do
-	echo "Removing $f"
-	rm -rf $f
+    for f in scripts/debian src/modules/dimax_u2c/blob .gitattributes .gitignore .mailmap; do
+        echo "Removing $f"
+        rm -rf $f
     done
-    (
-	cat src/modules/CMakeLists.txt | grep -v dimax
-    ) > /tmp/CMakeLists.txt
-    cp /tmp/CMakeLists.txt src/modules
     cd ..
 }
 
@@ -25,7 +21,7 @@ mkdir -p $BASE
 cd $BASE
 
 if [ "k$1" = "k" ] ; then
-  URL=https://yarp0.svn.sourceforge.net/svnroot/yarp0/trunk/yarp2
+  URL=https://github.com/robotology/yarp/trunk
   NAME=yarp
   #REV=$(svn info $URL|grep "^Last Changed Rev:"|sed -e 's|.*:\s*||')
   SVN_NAME=$(basename $URL)
@@ -46,7 +42,7 @@ if [ "k$1" = "k" ] ; then
   PROJECT(test)
   SET(CMAKE_MODULE_PATH \${PROJECT_SOURCE_DIR})
   INCLUDE(YarpVersion)
-  MESSAGE(STATUS "Version is \${YARP_VERSION_MAJOR}.\${YARP_VERSION_MINOR}.\${YARP_VERSION_PATCH}\${YARP_VERSION_MODIFIER}")
+  MESSAGE(STATUS "Version is \${YARP_VERSION}")
 EOF
   ) > CMakeLists.txt
   YARP_VERSION=`cmake . | grep "Version is " | sed "s/.*Version is //"`
@@ -54,10 +50,10 @@ EOF
   PACKAGE="yarp-$YARP_VERSION"
 
 else
-
-  URL=https://yarp0.svn.sourceforge.net/svnroot/yarp0/tags/$1
+  TAG=`echo $1 | sed "s/yarp-/v/"`
+  URL=https://github.com/robotology/yarp/tags/$TAG
   PACKAGE="$1"
-  SVN_NAME="$1"
+  SVN_NAME="$TAG"
 
 fi
 
@@ -67,24 +63,24 @@ cd unix
 echo "Working in $PWD, making $PACKAGE"
 
 if [ ! -e $PACKAGE ]; then
-	rm -rf $SVN_NAME
-	svn export $URL || exit 1
-	if [ ! "k$SVN_NAME" = "k$PACKAGE" ]; then
-	  if [ -f $SVN_NAME ]; then
-	    mkdir $PACKAGE || exit 1
-	  fi
-	  mv $SVN_NAME $PACKAGE || exit 1
+        rm -rf $SVN_NAME
+        svn export $URL || exit 1
+        if [ ! "k$SVN_NAME" = "k$PACKAGE" ]; then
+            if [ -f $SVN_NAME ]; then
+                mkdir $PACKAGE || exit 1
+            fi
+            mv $SVN_NAME $PACKAGE || exit 1
         fi
-	prune $PACKAGE || exit 1
-	rm -f *.tar.gz
+        prune $PACKAGE || exit 1
+        rm -f *.tar.gz
 else
-	echo "Unix checkout exists"
+    echo "Unix checkout exists"
 fi
 if [ ! -e $PACKAGE.tar.gz ]; then
-	echo "Making $PACKAGE.tar.gz"
-	tar cvzf $PACKAGE.tar.gz $PACKAGE || exit 1
+    echo "Making $PACKAGE.tar.gz"
+    tar cvzf $PACKAGE.tar.gz $PACKAGE || exit 1
 else
-	echo "Unix tarball exists"
+    echo "Unix tarball exists"
 fi
 
 cd $BASE
@@ -92,25 +88,25 @@ mkdir -p windows
 cd windows
 echo "Working in $PWD"
 if [ ! -e $PACKAGE ]; then
-	rm -rf $SVN_NAME
-	svn export $URL --native-eol CRLF || exit 1
-	if [ ! "k$SVN_NAME" = "k$PACKAGE" ]; then
-	  if [ -f $SVN_NAME ]; then
-	      mkdir $PACKAGE || exit 1
-	  fi
-	  mv $SVN_NAME $PACKAGE || exit 1
+    rm -rf $SVN_NAME
+    svn export $URL --native-eol CRLF || exit 1
+    if [ ! "k$SVN_NAME" = "k$PACKAGE" ]; then
+        if [ -f $SVN_NAME ]; then
+            mkdir $PACKAGE || exit 1
         fi
-	prune $PACKAGE || exit 1
-	rm -f *.zip
+        mv $SVN_NAME $PACKAGE || exit 1
+    fi
+    prune $PACKAGE || exit 1
+    rm -f *.zip
 else
-	echo "Windows checkout exists"
+    echo "Windows checkout exists"
 fi
 
 if [ ! -e $PACKAGE.zip ]; then
-	echo "Making $PACKAGE.zip"
-	zip -r $PACKAGE.zip $PACKAGE || exit 1
+    echo "Making $PACKAGE.zip"
+    zip -r $PACKAGE.zip $PACKAGE || exit 1
 else
-	echo "Windows zip exists"
+    echo "Windows zip exists"
 fi
 
 cd $BASE
@@ -125,7 +121,6 @@ cp windows/$PACKAGE.zip $PACKAGE
 cp unix/$PACKAGE.tar.gz $PACKAGE
 
 echo "You can now sync $BASE/$PACKAGE to sourceforge:"
-echo "cd $BASE"
-echo "rsync --recursive yarp-2.3.14 YOUR_USERNATE,yarp0@frs.sourceforge.net:/home/frs/project/y/ya/yarp0/yarp2"
+echo "(cd $BASE && rsync --recursive $PACKAGE YOUR_USERNAME,yarp0@frs.sourceforge.net:/home/frs/project/y/ya/yarp0/yarp2)"
 
 
