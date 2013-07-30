@@ -305,17 +305,17 @@ public:
      */
     static Bottle getConfigDirs();
 
-    yarp::os::Bottle findPaths(const char *key,
+    yarp::os::Bottle findPaths(const ConstString& key,
                                const ResourceFinderOptions& options);
 
-    yarp::os::ConstString findPath(const char *key,
+    yarp::os::ConstString findPath(const ConstString& key,
                                    const ResourceFinderOptions& options);
 
-    yarp::os::ConstString findFile(const char *key,
+    yarp::os::ConstString findFile(const ConstString& key,
                                    const ResourceFinderOptions& options);
 
     bool readConfig(Property& config,
-                    const char *key,
+                    const ConstString& key,
                     const ResourceFinderOptions& options);
 
     /* YARP 2.4 changes end */

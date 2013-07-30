@@ -285,7 +285,7 @@ public:
         struct YARP_DIRENT **namelist;
         YARP_closedir(dir);
         dir = NULL;
-        int n = YARP_scandir(dirname,&namelist,NULL,YARP_alphasort);
+        int n = YARP_scandir(dirname.c_str(),&namelist,NULL,YARP_alphasort);
         if (n<0) {
             return false;
         }

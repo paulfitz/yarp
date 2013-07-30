@@ -860,19 +860,19 @@ ConstString NetworkBase::getEnvironment(const char *key,
     return result;
 }
 
-void NetworkBase::setEnvironment(const char *key, const char *val) {
+void NetworkBase::setEnvironment(const ConstString& key, const ConstString& val) {
 #if defined(WIN32)
-    _putenv_s(key,val);
+    _putenv_s(key.c_str(),val.c_str());
 #else
-    ACE_OS::setenv(key,val,1);
+    ACE_OS::setenv(key.c_str(),val.c_str(),1);
 #endif
 }
 
-void NetworkBase::unsetEnvironment(const char *key) {
+void NetworkBase::unsetEnvironment(const ConstString& key) {
 #if defined(WIN32)
-    _putenv_s(key,"");
+    _putenv_s(key.c_str(),"");
 #else
-    ACE_OS::unsetenv(key);
+    ACE_OS::unsetenv(key.c_str());
 #endif
 }
 

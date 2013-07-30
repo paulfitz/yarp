@@ -449,7 +449,7 @@ public:
      * @param val the target value
      *
      */
-    static void setEnvironment(const char *key,const char *val);
+    static void setEnvironment(const ConstString& key,const ConstString& val);
 
     /**
      *
@@ -458,7 +458,7 @@ public:
      * @param key the variable to remove
      *
      */
-    static void unsetEnvironment(const char *key);
+    static void unsetEnvironment(const ConstString& key);
 
 
     /**
