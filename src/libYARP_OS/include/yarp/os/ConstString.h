@@ -14,6 +14,8 @@
 
 #include <string>
 
+#define YARP_CONSTSTRING_IS_STD_STRING 1
+
 namespace yarp {
     namespace os {
         typedef std::string ConstString;
