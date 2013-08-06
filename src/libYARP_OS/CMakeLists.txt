@@ -101,7 +101,13 @@ set(YARP_OS_HDRS include/yarp/os/AbstractCarrier.h
                  include/yarp/os/YarpNameSpace.h
                  include/yarp/os/YarpPlugin.h
                  include/yarp/os/YarpPluginSelector.h
-                 include/yarp/os/YarpPluginSettings.h)
+                 include/yarp/os/YarpPluginSettings.h
+                 include/yarp/os/Contactables.h
+                 include/yarp/os/Nodes.h
+                 include/yarp/os/Node.h
+                 include/yarp/os/NestedContact.h
+                 include/yarp/os/Mutex.h)
+		 
 
 set(YARP_OS_IDL_HDRS include/yarp/os/idl/WirePortable.h
                      include/yarp/os/idl/WireReader.h
@@ -297,7 +303,12 @@ set(YARP_OS_SRCS src/AbstractCarrier.cpp
                  src/YarpPlugin.cpp
                  src/ydr.cpp
                  src/hmac_sha2.c
-                 src/sha2.c)
+                 src/sha2.c
+                 src/Nodes.cpp
+                 src/Node.cpp
+                 src/NestedContact.cpp
+                 src/Mutex.cpp)
+
 
 source_group("Source Files" FILES ${YARP_OS_SRCS})
 source_group("Header Files" FILES ${YARP_OS_HDRS})

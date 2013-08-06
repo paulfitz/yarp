@@ -31,7 +31,7 @@ Contact RosNameSpace::getNameServerContact() const {
 }
 
 Contact RosNameSpace::queryName(const ConstString& name) {
-    printf("RosNameSpace::queryName(\"%s\")\n", name);
+    printf("RosNameSpace::queryName(\"%s\")\n", name.c_str());
     return Contact();
 
     /*

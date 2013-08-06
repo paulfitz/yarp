@@ -123,7 +123,7 @@ public:
     void add(Contactable& contactable);
     void update(Contactable& contactable);
     void remove(Contactable& contactable);
-    Contact query(const char *name, const char *category);
+    Contact query(const ConstString& name, const ConstString& category);
 
     void prepare(const ConstString& name);
 
@@ -270,7 +270,7 @@ void NodeHelper::remove(Contactable& contactable) {
     by_category.erase(item.nc.getCategory());
 }
 
-Contact NodeHelper::query(const char *name, const char *category) {
+Contact NodeHelper::query(const ConstString& name, const ConstString& category) {
     Contact result = Contact::invalid();
     std::map<ConstString,NodeItem>::const_iterator i = by_part_name.find(name);
     if (i != by_part_name.end()) {
@@ -362,8 +362,8 @@ void Node::remove(Contactable& contactable) {
     HELPER(this).mutex.unlock();
 }
 
-Contact Node::query(const char *name,
-                    const char *category) {
+Contact Node::query(const ConstString& name,
+                    const ConstString& category) {
     HELPER(this).mutex.lock();
     Contact result = HELPER(this).query(name,category);
     HELPER(this).mutex.unlock();
@@ -379,7 +379,7 @@ Contact Node::where() {
     return HELPER(this).port.where();
 }
 
-void Node::prepare(const char *name) {
+void Node::prepare(const ConstString& name) {
     HELPER(this).mutex.lock();
     HELPER(this).prepare(name);
     HELPER(this).mutex.unlock();

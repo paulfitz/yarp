@@ -27,14 +27,14 @@ public:
     virtual void update(Contactable& contactable);
     virtual void remove(Contactable& contactable);
 
-    virtual Contact query(const char *name,
-                          const char *category = "");
+    virtual Contact query(const ConstString& name,
+                          const ConstString& category = "");
 
     virtual Contact where();
 
     void interrupt();
 
-    virtual void prepare(const char *name);
+    virtual void prepare(const ConstString& name);
 private:
     void *system_resource;
 };

@@ -49,7 +49,7 @@ public:
     void update(Contactable& contactable);
     void prepare(const ConstString& name);
     void remove(Contactable& contactable);
-    Contact query(const char *name,const char *category);
+    Contact query(const ConstString& name,const ConstString& category);
     void interrupt();
 
     bool enable(bool flag) {
@@ -58,7 +58,7 @@ public:
         return active;
     }
 
-    Contact getParent(const char *name) {
+    Contact getParent(const ConstString& name) {
         Contact result;
         mutex.lock();
         NestedContact nc;
@@ -113,7 +113,7 @@ void NodesHelper::remove(Contactable& contactable) {
     if (node) node->remove(contactable);
 }
 
-Contact NodesHelper::query(const char *name,const char *category) {
+Contact NodesHelper::query(const ConstString& name,const ConstString& category) {
     Contact result;
     if (!active) return result;
     for (std::map<ConstString,Node *>::const_iterator it = by_name.begin();
@@ -166,7 +166,7 @@ void Nodes::remove(Contactable& contactable) {
 }
 
 
-Contact Nodes::query(const char *name,const char *category) {
+Contact Nodes::query(const ConstString& name,const ConstString& category) {
     HELPER(this).mutex.lock();
     Contact result = HELPER(this).query(name,category);
     HELPER(this).mutex.unlock();
@@ -188,11 +188,11 @@ void Nodes::clear() {
     HELPER(this).clear();
 }
 
-Contact Nodes::getParent(const char *name) {
+Contact Nodes::getParent(const ConstString& name) {
     return HELPER(this).getParent(name);
 }
 
-void Nodes::prepare(const char *name) {
+void Nodes::prepare(const ConstString& name) {
     NestedContact nc(name);
     if (!nc.isNested()) return;
     HELPER(this).mutex.unlock();

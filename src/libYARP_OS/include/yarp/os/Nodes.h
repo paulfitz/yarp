@@ -26,12 +26,12 @@ public:
     virtual void add(Contactable& contactable);
     virtual void remove(Contactable& contactable);
     
-    virtual Contact query(const char *name,
-                          const char *category = "");
+    virtual Contact query(const ConstString& name,
+                          const ConstString& category = "");
 
-    virtual Contact getParent(const char *name);
+    virtual Contact getParent(const ConstString& name);
 
-    virtual void prepare(const char *name);
+    virtual void prepare(const ConstString& name);
 
     virtual void update(Contactable& contactable);
 
