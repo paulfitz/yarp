@@ -226,7 +226,6 @@ public:
         checkTrue(conOut.isValid(),"valid address for /out");
 
         out.addOutput(Contact::byName("/in").addCarrier("tcp"));
-        //Time::delay(0.2);
 
         checkEqual(conIn.getName().c_str(),"/in","name is recorded");
 

@@ -48,8 +48,8 @@ Contact YarpNameSpace::registerName(const ConstString& name) {
 
 Contact YarpNameSpace::registerContact(const Contact& contact) {
     NameClient& nic = HELPER(this);
-    Address address = nic.registerName(contact.getName().c_str(),
-                                       Address::fromContact(contact));
+    Contact address = nic.registerName(contact.getName().c_str(),
+                                       contact);
     if (address.isValid()) {
         NestedContact nc;
         nc.fromString(address.getRegName().c_str());
@@ -71,14 +71,14 @@ Contact YarpNameSpace::registerContact(const Contact& contact) {
             }
         }
     }
-    return address.toContact();
+    return address;
 }
 
 Contact YarpNameSpace::updateContact(const Contact& contact) {
     return Contact();
 }
 
-Contact YarpNameSpace::unregisterName(const char *name) {
+Contact YarpNameSpace::unregisterName(const ConstString& name) {
     NestedContact nc;
     nc.fromString(name);
     ConstString cat = nc.getCategory();

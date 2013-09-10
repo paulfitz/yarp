@@ -1036,7 +1036,6 @@ void PortCore::report(const PortInfo& info) {
 
 bool PortCore::readBlock(ConnectionReader& reader, void *id, OutputStream *os) {
     bool result = true;
-        printf("%s %d %s\n", __FILE__, __LINE__, getName().c_str());
     // pass the data on out
 
     // we are in the context of one of the input threads,
@@ -1066,12 +1065,7 @@ bool PortCore::readBlock(ConnectionReader& reader, void *id, OutputStream *os) {
             sendHelper(recorder,PORTCORE_SEND_LOG);
         } else {
             // YARP is not needed as a middleman
-        printf("%s %d %s\n", __FILE__, __LINE__, getName().c_str());
-        printf("sending %ld to %ld\n",
-               (long int)(&reader),
-               (long int)(this->reader));
             result = this->reader->read(reader);
-        printf("%s %d %s\n", __FILE__, __LINE__, getName().c_str());
         }
 
         interruptible = true;

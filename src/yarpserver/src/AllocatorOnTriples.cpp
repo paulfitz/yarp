@@ -179,6 +179,8 @@ Contact AllocatorOnTriples::completePortName(const Contact& c) {
         db->update(t,NULL);
         t.setNsNameValue("alloc","tmpid","*");
         context.setRid(db->find(t,NULL));
+        /*
+          // not ready to switch /tmp port names yet
         if (tmpid>=1 && tmpid<=YARP_TOP_ELEMENT) {
             string name = elements[tmpid-1].code;
             std::transform(name.begin(),name.end(),name.begin(),::tolower);
@@ -186,6 +188,8 @@ Contact AllocatorOnTriples::completePortName(const Contact& c) {
         } else {
             sprintf(buf,"/atom/%u", tmpid);
         }
+        */
+        sprintf(buf,"/tmp/port/%u", tmpid);
         name = buf;
     }
 

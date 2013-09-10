@@ -221,6 +221,8 @@ public:
      */
     void setTimeout(float timeout);
 
+    void setNested(const yarp::os::NestedContact& flavor);
+
     /**
      * Get timeout for this Address.
      *
@@ -234,6 +236,8 @@ private:
     ConstString regName;
     ConstString hostName;
     ConstString carrier;
+    NestedContact flavor;
+
     int port;
     float timeout;
 };
