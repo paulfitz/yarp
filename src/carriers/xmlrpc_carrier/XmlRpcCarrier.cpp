@@ -61,6 +61,7 @@ void toXmlRpcValue(Value& vin, XmlRpcValue& vout) {
             }
         } else {
             vout = XmlRpcValue();
+            vout.setSize(bot->size());
             for (int i=offset; i<bot->size(); i++) {
                 XmlRpcValue& vouti = vout[i] = XmlRpcValue();
                 toXmlRpcValue(bot->get(i),vouti);

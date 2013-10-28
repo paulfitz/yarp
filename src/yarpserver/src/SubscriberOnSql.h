@@ -88,6 +88,14 @@ public:
         this->verbose = verbose;
     }
 
+    void *getDatabase() {
+        return implementation;
+    }
+
+    yarp::os::Semaphore *getDatabaseMutex() {
+        return &mutex;
+    }
+
 private:
     void *implementation;
     bool verbose;

@@ -14,7 +14,29 @@ if (YARP_USE_PERSISTENT_NAMESERVER)
   include_directories(${YARP_TREE_INCLUDE_DIRS})
   include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include)
 
-  add_library(YARP_serversql STATIC src/TripleSourceCreator.cpp src/TripleSourceCreator.h src/Triple.h src/TripleSource.h src/SqliteTripleSource.h ${CMAKE_CURRENT_SOURCE_DIR}/src/NameServiceOnTriples.cpp ${CMAKE_CURRENT_SOURCE_DIR}/src/NameServiceOnTriples.h ${CMAKE_CURRENT_SOURCE_DIR}/src/Allocator.h ${CMAKE_CURRENT_SOURCE_DIR}/src/AllocatorOnTriples.cpp ${CMAKE_CURRENT_SOURCE_DIR}/src/AllocatorOnTriples.h ${CMAKE_CURRENT_SOURCE_DIR}/src/Subscriber.h ${CMAKE_CURRENT_SOURCE_DIR}/src/SubscriberOnSql.h ${CMAKE_CURRENT_SOURCE_DIR}/src/SubscriberOnSql.cpp ${CMAKE_CURRENT_SOURCE_DIR}/src/ComposedNameService.h ${CMAKE_CURRENT_SOURCE_DIR}/src/ConnectThread.h ${CMAKE_CURRENT_SOURCE_DIR}/src/ParseName.h ${CMAKE_CURRENT_SOURCE_DIR}/src/ParseName.cpp ${CMAKE_CURRENT_SOURCE_DIR}/src/yarpserver3.cpp ${CMAKE_CURRENT_SOURCE_DIR}/src/StyleNameService.h ${CMAKE_CURRENT_SOURCE_DIR}/src/StyleNameService.cpp)
+  add_library(YARP_serversql STATIC 
+    src/TripleSourceCreator.cpp 
+    src/TripleSourceCreator.h 
+    src/Triple.h 
+    src/TripleSource.h 
+    src/SqliteTripleSource.h 
+    src/NameServiceOnTriples.cpp 
+    src/NameServiceOnTriples.h 
+    src/Allocator.h 
+    src/AllocatorOnTriples.cpp 
+    src/AllocatorOnTriples.h
+    src/Subscriber.h
+    src/SubscriberOnSql.h 
+    src/SubscriberOnSql.cpp 
+    src/ComposedNameService.h 
+    src/ConnectThread.h
+    src/ParseName.h
+    src/ParseName.cpp
+    src/StyleNameService.h 
+    src/StyleNameService.cpp
+    src/RosAdaptor.h
+    src/RosAdaptor.cpp
+    src/yarpserver3.cpp)
   target_link_libraries(YARP_serversql LINK_PRIVATE YARP_OS)
   target_link_libraries(YARP_serversql LINK_PRIVATE YARP_init)
   target_link_libraries(YARP_serversql LINK_PRIVATE YARP_name)

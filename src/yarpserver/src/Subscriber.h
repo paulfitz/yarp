@@ -10,6 +10,8 @@
 #ifndef YARPDB_SUBSCRIBER_INC
 #define YARPDB_SUBSCRIBER_INC
 
+#include <stdio.h>
+
 #include <yarp/name/NameService.h>
 #include "ConnectThread.h"
 

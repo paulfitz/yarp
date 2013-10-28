@@ -28,6 +28,7 @@
 #include "StyleNameService.h"
 #include "ComposedNameService.h"
 #include "ParseName.h"
+#include "RosAdaptor.h"
 
 using namespace yarp::os;
 using namespace yarp::name;
@@ -43,6 +44,8 @@ private:
     NameServiceOnTriples ns;
     StyleNameService style;
     ComposedNameService combo1;
+    ComposedNameService combo2;
+    RosAdaptor ros;
     bool silent;
 public:
     using ComposedNameService::open;
@@ -137,8 +140,11 @@ public:
         subscriber.setStore(ns);
         ns.setSubscriber(&subscriber);
         style.configure(options);
-        combo1.open(subscriber,style);
+        combo2.open(style,ros);
+        combo1.open(subscriber,combo2);
         open(combo1,ns);
+        ros.setSubscriber(&subscriber);
+        ros.setStore(*this);
         return true;
     }
 };

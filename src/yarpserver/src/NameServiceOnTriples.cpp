@@ -555,6 +555,7 @@ bool NameServiceOnTriples::apply(yarp::os::Bottle& cmd,
                                  yarp::os::Bottle& reply, 
                                  yarp::os::Bottle& event,
                                  const yarp::os::Contact& remote) {
+    printf("WOW! %s\n", cmd.toString().c_str());
     ConstString key = cmd.get(0).toString();
     ConstString prefix = " * ";
     
