@@ -503,18 +503,6 @@ public:
 
     virtual void onCommencement();
 
-    /*
-      virtual bool write(ConnectionWriter& writer) {
-      writeBlock(writer);
-      return true;
-      }
-
-      virtual bool read(yarp::os::ConnectionReader& reader) {
-      readBlock(reader);
-      return true;
-      }
-    */
-
     const char *getBytes();
     size_t byteCount();
 
@@ -545,16 +533,6 @@ public:
         }
     }
 
-    yarp::os::Value& addBit(const char *str) {
-        size_t len = size();
-        String x(str);
-        smartAdd(x);
-        if (size()>len) {
-            return get((int)size()-1);
-        }
-        return get(-1);
-    }
-
     static StoreNull& getNull() {
         return storeNull;
     }
@@ -566,6 +544,10 @@ public:
         dirty = true;
     }
 
+    bool isHashLike() const {
+        return hashLike;
+    }
+
 private:
     static StoreNull storeNull;
 
@@ -574,9 +556,10 @@ private:
     int speciality;
     bool nested;
     bool dirty;
+    bool hashLike;
 
     void add(Storable *s);
-    void smartAdd(const String& str);
+    void smartAdd(const String& str, bool hasHash);
 
     void synch();
 };

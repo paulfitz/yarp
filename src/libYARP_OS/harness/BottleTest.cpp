@@ -624,6 +624,16 @@ public:
         checkEqual(bot.get(0).asString().c_str(),"---","interpreted ok");
     }
 
+    void testHash() {
+        report(0,"test hash representation");
+        Bottle bot("1 (1 2 3) (1: 2, 3: 4, 5: 6) () (:)");
+        checkEqual(bot.get(2).find("3").toString(),"4","basic lookup");
+        checkEqual(bot.get(4).isList(),true,"hashes are lists too");
+        checkEqual(bot.get(4).asList()->size(),0,"empty hash");
+        Bottle bot2 = bot;
+        checkEqual(bot2.get(2).find("3").toString(),"4","survives copy");
+    }
+
     virtual void runTests() {
         testClear();
         testSize();
@@ -659,6 +669,7 @@ public:
         testDict();
         testLoopBug();
         testManyMinus();
+        testHash();
     }
 
     virtual String getName() {

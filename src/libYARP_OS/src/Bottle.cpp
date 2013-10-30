@@ -384,9 +384,14 @@ Bottle *Bottle::create() {
     return new Bottle();
 }
 
-bool Bottle::isList() {
+bool Bottle::isList() const {
     return true;
 }
+
+bool Bottle::isDict() const {
+    return HELPER(implementation).isHashLike();
+}
+
 
 
 ConstString Bottle::toString(int x) {

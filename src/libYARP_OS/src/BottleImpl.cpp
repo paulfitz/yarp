@@ -32,16 +32,6 @@ using namespace yarp::os::impl;
 #define YMSG(x)
 #define YTRACE(x) 
 
-// YARP1 compatible codes
-//const int StoreInt::code = 1;
-//const int StoreString::code = 5;
-//const int StoreDouble::code = 2;
-//const int StoreList::code = 16;
-//const int StoreVocab::code = 32;
-//const int StoreBlob::code = 33;
-//#define USE_YARP1_PREFIX
-
-// new YARP2 codes
 const int StoreInt::code = BOTTLE_TAG_INT;
 const int StoreVocab::code = BOTTLE_TAG_VOCAB;
 const int StoreDouble::code = BOTTLE_TAG_DOUBLE;
@@ -60,6 +50,7 @@ BottleImpl::BottleImpl() {
     dirty = true;
     nested = false;
     speciality = 0;
+    hashLike = false;
 }
 
 
@@ -82,7 +73,7 @@ void BottleImpl::clear() {
     dirty = true;
 }
 
-void BottleImpl::smartAdd(const String& str) {
+void BottleImpl::smartAdd(const String& str, bool hasHash) {
     if (str.length()>0) {
         char ch = str[0];
         Storable *s = NULL;
@@ -163,6 +154,7 @@ void BottleImpl::smartAdd(const String& str) {
                 }
             }
             add(s);
+            if (hasHash) hashLike = true;
         }
         ss = NULL;
     }
@@ -175,12 +167,16 @@ void BottleImpl::fromString(const String& line) {
     bool quoted = false;
     bool back = false;
     bool begun = false;
+    bool hasHash = false;
     int nested = 0;
     int nestedAlt = 0;
     String nline = line + " ";
 
-    for (unsigned int i=0; i<nline.length(); i++) {
+    size_t len = nline.length();
+    for (unsigned int i=0; i<len; i++) {
         char ch = nline[i];
+        char nch = ' ';
+        if (i+1<len) nch = nline[i+1];
         if (back) {
             arg += ch;
             back = false;
@@ -199,6 +195,15 @@ void BottleImpl::fromString(const String& line) {
                     }
                 }
                 if (!quoted) {
+                    /*
+                    if (ch==':') {
+                        if (nested == 1) {
+                            hasHash = true;
+                        } else if (nested == 0) {
+                            //hashLike = true;
+                        }
+                    }
+                    */
                     if (ch=='(') {
                         nested++;
                     }
@@ -216,15 +221,17 @@ void BottleImpl::fromString(const String& line) {
                     back = true;
                     arg += ch;
                 } else {
-                    if ((!quoted)&&(ch==','||ch==' '||ch=='\t'||ch=='\n'||ch=='\r')
+                    bool label = ch==':'&&(nch==')'||nch==' '||nch=='\t'||nch=='\n'||nch=='\r');
+                    if ((!quoted)&&(label||ch==','||ch==' '||ch=='\t'||ch=='\n'||ch=='\r')
                         &&(nestedAlt==0)
                         &&(nested==0)) {
                         if (arg=="") {
                             if (ch==',') {
                                 add(new StoreVocab(VOCAB4('n','u','l','l')));
                             }
+                            if (label) hashLike = true;
                         } else {
-                            smartAdd(arg);
+                            smartAdd(arg,label);
                         }
                         arg = "";
                         begun = false;
@@ -280,15 +287,11 @@ bool BottleImpl::isComplete(const char *txt) {
                 }
                 if (ch=='\\') {
                     back = true;
-                    //arg += ch;
                 } else {
                     if ((!quoted)&&(ch==' '||ch=='\t'||ch=='\n'||ch=='\r')
                         &&(nestedAlt==0)
                         &&(nested==0)) {
-                        //smartAdd(arg);
                         begun = false;
-                    } else {
-                        //arg += ch;
                     }
                 }
             }
@@ -301,10 +304,18 @@ bool BottleImpl::isComplete(const char *txt) {
 String BottleImpl::toString() {
     String result = "";
     for (unsigned int i=0; i<content.size(); i++) {
+        if (hashLike) {
+            if (i%2==1) { 
+                result += ":"; 
+            } else if (i>0) {
+                result += ",";
+            }
+        }
         if (i>0) { result += " "; }
         Storable& s = *content[i];
         result += s.toStringNested();
     }
+    if (hashLike && content.size()==0) result += ":";
     return result;
 }
 
@@ -460,16 +471,6 @@ bool BottleImpl::write(ConnectionWriter& writer) {
         }
 #endif
         synch();
-        /*
-          if (!nested) {
-          // No byte count any more, to facilitate nesting
-          //YMSG(("bottle byte count %d\n",byteCount()));
-          //writer.appendInt(byteCount()+sizeof(NetInt32));
-          
-          writer.appendInt(StoreList::code + speciality);
-          }
-        */
-        //writer.appendBlockCopy(Bytes((char*)getBytes(),byteCount()));
         writer.appendBlock((char*)getBytes(),byteCount());
     }
     return !writer.isError();
@@ -513,9 +514,6 @@ bool BottleImpl::read(ConnectionReader& reader) {
         }
 #endif
         if (!nested) {
-            // no byte length any more to facilitate nesting
-            //reader.expectInt(); // the bottle byte ct; ignored
-            
             clear();
             specialize(0);
             

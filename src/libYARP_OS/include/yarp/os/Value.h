@@ -137,7 +137,7 @@ public:
 
     /**
      * Checks if value is a dictionary. If so, asDict() will return that
-     * dictionary.
+     * dictionary.  Note, in YARP dictionaries are also lists.
      * @return true iff value is a dictionary
      */
     virtual bool isDict() const;
@@ -206,7 +206,7 @@ public:
      * @return pointer to dictionary if value is indeed of the right type.
      * Otherwise returns NULL
      */
-    virtual Property *asDict() const;
+    virtual Bottle *asDict() const;
 
     /**
      * Get dictionary or list value

@@ -454,7 +454,9 @@ private:
     bool isList(int index);
 
 
-    virtual bool isList();
+    virtual bool isList() const;
+
+    virtual bool isDict() const;
 
     //virtual Bottle *asList() {
     //  return this;
