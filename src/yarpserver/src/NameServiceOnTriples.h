@@ -95,6 +95,8 @@ public:
 
     virtual bool announce(const yarp::os::ConstString& name, int activity);
 
+    virtual bool update(const yarp::os::ConstString& name, int activity);
+
     virtual yarp::os::Contact query(const yarp::os::ConstString& portName);
 
     bool cmdQuery(NameTripleState& act, bool nested = false);

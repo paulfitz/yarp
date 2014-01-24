@@ -13,6 +13,7 @@
 #include <yarp/os/Vocab.h>
 #include <yarp/os/Network.h>
 #include <yarp/os/Time.h>
+#include <yarp/os/RosNameSpace.h>
 #include "NameServiceOnTriples.h"
 #include "ParseName.h"
 
@@ -21,6 +22,28 @@ using namespace std;
 
 //#define mutex printf("mutex %s %d\n", __FILE__, __LINE__), mutex
 
+class NegotiateWithEvil /* just kidding! */ {
+public:
+    RosNameSpace *pros;
+
+    NegotiateWithEvil() {
+        pros = NULL;
+    }
+
+    virtual ~NegotiateWithEvil() {
+        if (pros) {
+            delete pros;
+            pros = NULL;
+        }
+    }
+
+    RosNameSpace& ros() {
+        if (!pros) pros = new RosNameSpace(Contact::fromString("xmlrpc://localhost:11311"));
+        return *pros;
+    }
+};
+
+static NegotiateWithEvil evil;
 
 Contact NameServiceOnTriples::query(const yarp::os::ConstString& portName, 
                                     NameTripleState& act,
@@ -279,6 +302,7 @@ bool NameServiceOnTriples::cmdRegister(NameTripleState& act) {
     sprintf(buf,"%d",sock);
     t.setNameValue("socket",buf);
     act.mem.update(t,&context);
+
     // now, query to report that it worked
     act.mem.reset();
     act.cmd.clear();
@@ -295,6 +319,32 @@ bool NameServiceOnTriples::cmdRegister(NameTripleState& act) {
     return cmdQuery(act);
 }
 
+bool NameServiceOnTriples::update(const ConstString& name, int activity) {
+    //PFHIT
+    printf("UPDATE %s %d\n", name.c_str(), activity);
+    if (activity == 1) {
+        NestedContact nc(name);
+        if (nc.getNestedName().size()>0) {
+            Contact node;
+            {
+                Bottle cmd,reply,event;
+                Contact remote;
+                TripleSource& mem = *db;
+                NameTripleState act(cmd,reply,event,remote,mem);
+                node = query(nc.getNodeName(),act,"",true);
+            }
+            Contact c = Contact::fromString(name);
+            printf("REGISTER throw %s over the wall %s/%s -- %s\n", 
+                   c.toString().c_str(),
+                   nc.getNestedName().c_str(),
+                   nc.getNodeName().c_str(),
+                   node.toURI().c_str());
+            evil.ros().registerNestedContact(c,node);
+        }
+    }
+    return true;
+}
+
 
 bool NameServiceOnTriples::announce(const ConstString& name, int activity) {
     if (subscriber!=NULL&&gonePublic) {
@@ -305,9 +355,32 @@ bool NameServiceOnTriples::announce(const ConstString& name, int activity) {
 
 bool NameServiceOnTriples::cmdUnregister(NameTripleState& act) {
     ConstString port = act.cmd.get(1).asString();
-    //printf(" - unregister %s\n", port.c_str());
+    printf(" - unregister %s\n", port.c_str());
     announce(port.c_str(),-1);
+
     lock();
+
+    //PFHIT
+    NestedContact nc(port);
+    if (nc.getNestedName().size()>0) {
+        printf("pull %s (%s)\n", 
+               port.c_str(),
+               nc.getNestedName().c_str());
+        Contact node;
+        {
+            Bottle cmd,reply,event;
+            Contact remote;
+            TripleSource& mem = *db;
+            NameTripleState act(cmd,reply,event,remote,mem);
+            node = query(nc.getNodeName(),act,"",true);
+        }
+        printf("throw over the wall %s || %s -- %s\n", 
+               nc.getNestedName().c_str(),
+               nc.getNodeName().c_str(),
+               node.toURI().c_str());
+        evil.ros().unregisterNestedName(port,node);
+    }
+
     Contact contact = query(port.c_str(),act,"",true);
     alloc->freePortResources(contact);
     act.reply.addString("old");

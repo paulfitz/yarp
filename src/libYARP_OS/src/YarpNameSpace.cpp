@@ -47,6 +47,7 @@ Contact YarpNameSpace::registerContact(const Contact& contact) {
     NameClient& nic = HELPER(this);
     Contact address = nic.registerName(contact.getName().c_str(),
                                        contact);
+    /*
     if (address.isValid()) {
         NestedContact nc;
         nc.fromString(address.getRegName().c_str());
@@ -68,10 +69,12 @@ Contact YarpNameSpace::registerContact(const Contact& contact) {
             }
         }
     }
+    */
     return address;
 }
 
 Contact YarpNameSpace::unregisterName(const ConstString& name) {
+    /*
     NestedContact nc;
     nc.fromString(name);
     ConstString cat = nc.getCategory();
@@ -89,6 +92,7 @@ Contact YarpNameSpace::unregisterName(const ConstString& name) {
             disconnectPortFromTopic(c1,c2,style);
         }
     }
+    */
     NameClient& nic = HELPER(this);
     return nic.unregisterName(name);
 }

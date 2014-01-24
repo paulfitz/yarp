@@ -465,12 +465,16 @@ bool Port::open(const Contact& contact, bool registerName,
         registerName = false;
     }
     if (registerName&&!local) {
+        // create a node if needed
+        Nodes& nodes = NameClient::getNameClient().getNodes();
+        nodes.prepare(address.getRegName().c_str());
+        // go ahead and register
         address = NetworkBase::registerContact(contact2);
     }
 
     core.setControlRegistration(registerName);
-    success = (address.isValid()||local)&&(fakeName==NULL);
 
+    success = (address.isValid()||local)&&(fakeName==NULL);
     if (success) {
         // create a node if needed
         Nodes& nodes = NameClient::getNameClient().getNodes();

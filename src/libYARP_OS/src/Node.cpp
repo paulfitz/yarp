@@ -148,6 +148,12 @@ public:
     }
 
     void clear() {
+        while (name_cache.begin()!=name_cache.end()) {
+            Contactable *c = name_cache.begin()->first;
+            if (c) {
+                c->close();
+            }
+        }
     }
 
     void add(Contactable& contactable);

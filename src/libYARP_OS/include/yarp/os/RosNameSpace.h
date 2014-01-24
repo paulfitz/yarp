@@ -35,7 +35,11 @@ public:
     virtual Contact queryName(const ConstString& name);
     virtual Contact registerName(const ConstString& name);
     virtual Contact registerContact(const Contact& contact);
+    Contact registerNestedContact(const Contact& contact,
+                                  const Contact& cnode); // ROS-specific
     virtual Contact unregisterName(const ConstString& name);
+    Contact unregisterNestedName(const ConstString& name,
+                                 const Contact& cnode); // ROS-specific
     virtual Contact unregisterContact(const Contact& contact);
 
     virtual bool setProperty(const ConstString& name, 

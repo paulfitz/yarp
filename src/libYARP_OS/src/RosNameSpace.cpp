@@ -18,7 +18,7 @@
 using namespace yarp::os;
 using namespace yarp::os::impl;
 
-#define dbg_printf if (0) printf
+#define dbg_printf if (1) printf
 
 RosNameSpace::RosNameSpace(const Contact& contact) : mutex(1) {
     this->contact = contact;
@@ -118,6 +118,12 @@ Contact RosNameSpace::registerName(const ConstString& name) {
 }
 
 Contact RosNameSpace::registerContact(const Contact& contact) {
+    Contact node;
+    return registerNestedContact(contact,node);
+}
+
+Contact RosNameSpace::registerNestedContact(const Contact& contact,
+                                            const Contact& cnode) {
     dbg_printf("ROSNameSpace registerContact(%s)\n", 
                contact.toString().c_str());
     NestedContact nc = contact.getNested();
@@ -126,6 +132,7 @@ Contact RosNameSpace::registerContact(const Contact& contact) {
     }
     ConstString cat = nc.getCategory();
     if (nc.getNestedName()!="") {
+        dbg_printf("ROSNameSpace Working on %s\n", nc.getNestedName().c_str());
         if (cat == "-1") {
             Bottle cmd, reply;
             cmd.clear();
@@ -157,11 +164,20 @@ Contact RosNameSpace::registerContact(const Contact& contact) {
             }
             cmd.addString(typ);
             Nodes& nodes = NameClient::getNameClient().getNodes();
-            Contact c = rosify(nodes.getParent(contact.getName()));
+            Contact c;
+            if (cnode.isValid()) {
+                c = rosify(cnode);
+            } else {
+                c = rosify(nodes.getParent(contact.getName()));
+            }
             //Contact c = rosify(contact);
             cmd.addString(c.toString());
+            //ContactStyle style;
+            //style.carrier = "xmlrpc";
             bool ok = NetworkBase::write(getNameServerContact(),
                                          cmd, reply);
+            printf("  msg %s\n", cmd.toString().c_str());
+            printf("  reply %s\n", reply.toString().c_str());
             if (!ok) return Contact();
             if (cat=="-") {
                 Bottle *publishers = reply.get(2).asList();
@@ -246,6 +262,12 @@ Contact RosNameSpace::registerContact(const Contact& contact) {
 }
 
 Contact RosNameSpace::unregisterName(const ConstString& rname) {
+    Contact node;
+    return unregisterNestedName(rname,node);
+}
+
+Contact RosNameSpace::unregisterNestedName(const ConstString& rname,
+                                           const Contact& cnode) {
     NestedContact nc;
     nc.fromString(rname);
     ConstString cat = nc.getCategory();
@@ -270,10 +292,17 @@ Contact RosNameSpace::unregisterName(const ConstString& rname) {
             cmd.addString(toRosNodeName(nc.getNodeName()));
             cmd.addString(nc.getNestedName());
             Nodes& nodes = NameClient::getNameClient().getNodes();
-            Contact c = rosify(nodes.getParent(rname));
+            Contact c;
+            if (cnode.isValid()) {
+                c = rosify(cnode);
+            } else {
+                c = rosify(nodes.getParent(rname));
+            }
             cmd.addString(c.toString());
             bool ok = NetworkBase::write(getNameServerContact(),
                                          cmd, reply);
+            printf("  msg %s\n", cmd.toString().c_str());
+            printf("  reply %s\n", reply.toString().c_str());
             if (!ok) return Contact();
         }
         return Contact();
