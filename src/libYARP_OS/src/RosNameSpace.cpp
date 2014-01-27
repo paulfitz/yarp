@@ -181,6 +181,7 @@ Contact RosNameSpace::registerNestedContact(const Contact& contact,
             if (!ok) return Contact();
             if (cat=="-") {
                 Bottle *publishers = reply.get(2).asList();
+                if (publishers) printf("  publishers are [%s]\n", publishers->toString().c_str());
                 if (publishers && publishers->size()>=1) {
                     cmd.clear();
                     cmd.addString(contact.toURI());

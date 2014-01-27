@@ -174,6 +174,8 @@ static bool waitConnect(const ConstString& n1,
                         const ConstString& n2,
                         double timeout) {
     double start = Time::now();
+    printf("Waiting for connection between %s and %s\n", n1.c_str(),
+           n2.c_str());
     while (Time::now()-start<timeout) {
         if (NetworkBase::isConnected(n1,n2)) {
             return true;
@@ -188,8 +190,8 @@ void NodeTest::portTopicCombo() {
     NameClient::getNameClient().getNodes().clear();
     Port p1;
     Port p2;
-    p1.open("/test1=+/p1");
-    p2.open("/test2=-/p1");
+    p1.open("/test1+@/p1");
+    p2.open("/test1-@/p2");
     checkTrue(waitConnect(p1.getName(),p2.getName(),20), 
               "auto connect working");
     NameClient::getNameClient().getNodes().clear();

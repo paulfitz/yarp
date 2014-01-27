@@ -252,6 +252,11 @@ bool SubscriberOnSql::removeSubscription(const ConstString& src,
 }
 
 bool SubscriberOnSql::welcome(const ConstString& port, int activity) {
+    NameStore *store = getStore();
+    if (store!=NULL) {
+        store->update(port,activity);
+    }
+ 
     mutex.wait();
     char *msg = NULL;
     char *query;

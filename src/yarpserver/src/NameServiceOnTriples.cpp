@@ -321,8 +321,9 @@ bool NameServiceOnTriples::cmdRegister(NameTripleState& act) {
 
 bool NameServiceOnTriples::update(const ConstString& name, int activity) {
     //PFHIT
-    printf("UPDATE %s %d\n", name.c_str(), activity);
+    mutex.wait();
     if (activity == 1) {
+        printf("........UPDATE....... %s %d\n", name.c_str(), activity);
         NestedContact nc(name);
         if (nc.getNestedName().size()>0) {
             Contact node;
@@ -333,15 +334,54 @@ bool NameServiceOnTriples::update(const ConstString& name, int activity) {
                 NameTripleState act(cmd,reply,event,remote,mem);
                 node = query(nc.getNodeName(),act,"",true);
             }
-            Contact c = Contact::fromString(name);
-            printf("REGISTER throw %s over the wall %s/%s -- %s\n", 
+            Contact c;
+            {
+                Bottle cmd,reply,event;
+                Contact remote;
+                TripleSource& mem = *db;
+                NameTripleState act(cmd,reply,event,remote,mem);
+                c = query(name,act,"",true);
+            }
+            printf("REGISTER throw %s over the wall %s | %s -- %s\n", 
                    c.toString().c_str(),
                    nc.getNestedName().c_str(),
                    nc.getNodeName().c_str(),
                    node.toURI().c_str());
             evil.ros().registerNestedContact(c,node);
         }
+        printf("........UPDATE DONE....... %s %d\n", name.c_str(), activity);
+    } else {
+        printf("........NEGUPDATE....... %s %d\n", name.c_str(), activity);
+        NestedContact nc(name);
+        if (nc.getNestedName().size()>0) {
+            Contact node;
+            {
+                Bottle cmd,reply,event;
+                Contact remote;
+                TripleSource& mem = *db;
+                NameTripleState act(cmd,reply,event,remote,mem);
+                node = query(nc.getNodeName(),act,"",true);
+            }
+            /*
+            Contact c;
+            {
+                Bottle cmd,reply,event;
+                Contact remote;
+                TripleSource& mem = *db;
+                NameTripleState act(cmd,reply,event,remote,mem);
+                c = query(name,act,"",true);
+            }
+            */
+            printf("UNREGISTER throw %s over the wall %s | %s -- %s\n", 
+                   name.c_str(),
+                   nc.getNestedName().c_str(),
+                   nc.getNodeName().c_str(),
+                   node.toURI().c_str());
+            evil.ros().unregisterNestedName(name,node);
+        }
+        printf("........NEGUPDATE DONE....... %s %d\n", name.c_str(), activity);
     }
+    mutex.post();
     return true;
 }
 
