@@ -124,7 +124,7 @@ void NodeTest::basicNodesTest() {
     n.remove(p3);
     n.remove(p2);
     n.remove(p1);
-    NameClient::getNameClient().getNodes().enable(true);
+    NameClient::getNameClient().getNodes().clear();
 }
 
 void NodeTest::basicTypeTest() {
@@ -175,10 +175,11 @@ static bool waitConnect(const ConstString& n1,
                         double timeout) {
     double start = Time::now();
     while (Time::now()-start<timeout) {
+        printf("Checking for connection from %s to %s\n", n1.c_str(), n2.c_str());
         if (NetworkBase::isConnected(n1,n2)) {
             return true;
         }
-        Time::delay(0.1);
+        Time::delay(0.5);
     }
     return false;
 }
@@ -188,10 +189,17 @@ void NodeTest::portTopicCombo() {
     NameClient::getNameClient().getNodes().clear();
     Port p1;
     Port p2;
-    p1.open("/test=+/p1");
-    p2.open("/test=-/p1");
+    p1.open("/test1=+/p1");
+    p2.open("/test2=-/p1");
+    //p1.open("/p1+@/test1");
+    //p2.open("/p1-@/test2");
     checkTrue(waitConnect(p1.getName(),p2.getName(),20), 
               "auto connect working");
+    //Time::delay(1);
+    p1.close();
+    //Time::delay(1);
+    p2.close();
+    //Time::delay(1);
     NameClient::getNameClient().getNodes().clear();
 }
 
