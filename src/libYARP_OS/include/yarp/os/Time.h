@@ -10,7 +10,8 @@
 #ifndef _YARP2_TIME_
 #define _YARP2_TIME_
 
-#include <yarp/os/api.h>
+#include <yarp/os/ConstString.h>
+#include <yarp/os/Clock.h>
 
 namespace yarp {
     namespace os {
@@ -53,35 +54,15 @@ public:
      */  
     static void turboBoost();
 
+    static void useSystemClock();
 
-    /*
-    // extensions to support simulated time.  When practical, 
-    // we model ROS's ros::Time API.
+    static void useNetworkClock(const ConstString& clock);
 
-    /**
-     *
-     * Determine whether system time has been replaced with a simulation.
-     *
-     */
-    //static bool isSimTime();
+    static void useCustomClock(Clock *clock);
 
-    /**
-     *
-     * Determine whether we are using unmodified system time.
-     *
-     */
-    //static bool isSystemTime();
+    static bool isSystemClock();
 
-    /**
-     *
-     * Determine whether the current time is non-zero.  Time is zero
-     * in the case of simulated time when a simulated time signal
-     * has not yet been received.
-     *
-     */
-    //static bool isValid();
-    
-
+    static bool isValid();
 };
 
 #endif

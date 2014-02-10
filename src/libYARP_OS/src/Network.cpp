@@ -575,7 +575,9 @@ void NetworkBase::initMinimum() {
         }
         ConstString clock = getEnvironment("YARP_CLOCK");
         if (clock!="") {
-            Time::useNetworkTime(clock);
+            Time::useNetworkClock(clock);
+        } else {
+            Time::useSystemClock();
         }
         Logger::get().setPid();
         // make sure system is actually able to do things fast
@@ -592,6 +594,7 @@ void NetworkBase::finiMinimum() {
         NameClient::removeNameClient();
         removeNameSpace();
         Carriers::removeInstance();
+        Time::useSystemClock();
 #ifdef YARP_HAS_ACE
         ACE::fini();
 #endif
