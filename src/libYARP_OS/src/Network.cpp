@@ -573,6 +573,10 @@ void NetworkBase::initMinimum() {
             YARP_SPRINTF1(Logger::get(), info,
                           "YARP_STACK_SIZE set to %d", sz);
         }
+        ConstString clock = getEnvironment("YARP_CLOCK");
+        if (clock!="") {
+            Time::useNetworkTime(clock);
+        }
         Logger::get().setPid();
         // make sure system is actually able to do things fast
         Time::turboBoost();

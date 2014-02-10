@@ -53,6 +53,35 @@ public:
      */  
     static void turboBoost();
 
+
+    /*
+    // extensions to support simulated time.  When practical, 
+    // we model ROS's ros::Time API.
+
+    /**
+     *
+     * Determine whether system time has been replaced with a simulation.
+     *
+     */
+    //static bool isSimTime();
+
+    /**
+     *
+     * Determine whether we are using unmodified system time.
+     *
+     */
+    //static bool isSystemTime();
+
+    /**
+     *
+     * Determine whether the current time is non-zero.  Time is zero
+     * in the case of simulated time when a simulated time signal
+     * has not yet been received.
+     *
+     */
+    //static bool isValid();
+    
+
 };
 
 #endif
