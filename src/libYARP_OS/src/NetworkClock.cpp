@@ -17,10 +17,11 @@
 
 using namespace yarp::os;
 
-NetworkClock::NetworkClock() : tick(false), mutex(1) {
+NetworkClock::NetworkClock() : tick(0), mutex(1) {
     sec = 0;
     nsec = 0;
     t = 0;
+    waiters = 0;
 }
 
 bool NetworkClock::open(const ConstString& name) {
@@ -55,6 +56,9 @@ void NetworkClock::delay(double seconds) {
     SystemClock c;
     double start = now();
     do {
+        mutex.wait();
+        waiters++;
+        mutex.post();
         tick.wait();
     } while (now()-start<seconds);
 }
@@ -70,7 +74,11 @@ bool NetworkClock::read(ConnectionReader& reader) {
     sec = bot.get(0).asInt();
     nsec = bot.get(1).asInt();
     t = sec + (nsec*1e-9);
+    int pending_waiters = waiters;
+    waiters = 0;
     mutex.post();
-    tick.signal();
+    for (int i=0; i<pending_waiters; i++) {
+        tick.post();
+    }
     return true;
 }

@@ -13,7 +13,6 @@
 #include <yarp/os/Clock.h>
 #include <yarp/os/Port.h>
 #include <yarp/os/NetInt32.h>
-#include <yarp/os/Event.h>
 #include <yarp/os/Semaphore.h>
 #include <yarp/conf/numeric.h>
 
@@ -37,7 +36,8 @@ public:
     virtual bool read(ConnectionReader& reader);
 private:
     Port port;
-    Event tick;
+    int waiters;
+    Semaphore tick;
     Semaphore mutex;
     
     YARP_INT32 sec;
