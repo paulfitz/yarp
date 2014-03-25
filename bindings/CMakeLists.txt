@@ -140,9 +140,24 @@ ENDIF (CREATE_JAVA)
 IF (CREATE_PYTHON)	 
   SET(CMAKE_SWIG_FLAGS "-Wall;-module;yarp;-threads")
   SET(CREATE_PYTHON_VERSION "" CACHE STRING "Control python version used, if you wish." )
+  FIND_PACKAGE(PythonInterp ${CREATE_PYTHON_VERSION})
+  if (NOT CREATE_PYTHON_VERSION)
+    # try to detect the version of python found by PythonInterp, and
+    # pass that on to PythonLibs.  This may be unnecessary in
+    # later CMake versions: http://public.kitware.com/Bug/view.php?id=13794
+    execute_process(COMMAND ${PYTHON_EXECUTABLE} 
+      -c "from distutils import sysconfig; print(sysconfig.get_python_lib());" 
+      OUTPUT_VARIABLE PYTHON_LIBDIR OUTPUT_STRIP_TRAILING_WHITESPACE)
+    string(REGEX MATCH "python([0-9][-_.0-9]+)" PYTHON_IGNORE "${PYTHON_LIBDIR}")
+    set(CREATE_PYTHON_VERSION ${CMAKE_MATCH_1})
+    if (CREATE_PYTHON_VERSION)
+      message(STATUS "Detected python version ${CREATE_PYTHON_VERSION} (override CREATE_PYTHON_VERSION to change)")
+    endif()
+  endif ()
   if (CREATE_PYTHON_VERSION)
     set(PythonLibs_FIND_VERSION ${CREATE_PYTHON_VERSION})
-  endif ()
+    set(PythonLibs_FIND_VERSION_EXACT ${CREATE_PYTHON_VERSION})
+  endif()
   FIND_PACKAGE(PythonLibs ${CREATE_PYTHON_VERSION})
   INCLUDE_DIRECTORIES(${PYTHON_INCLUDE_PATH})
   LINK_LIBRARIES(${PYTHON_LIBRARY})
@@ -169,8 +184,6 @@ IF (CREATE_PYTHON)
   GET_TARGET_PROPERTY(yarp_lib_location _${target_name} LOCATION)
 
   # installation path is determined reliably on most platforms using distutils
-  FIND_PACKAGE(PythonInterp ${CREATE_PYTHON_VERSION})
-
   EXECUTE_PROCESS(COMMAND ${PYTHON_EXECUTABLE} 
     -c "from distutils import sysconfig; print(sysconfig.get_python_lib(1,0,prefix='${CMAKE_INSTALL_PREFIX}'))" 
     OUTPUT_VARIABLE PYTHON_INSTDIR OUTPUT_STRIP_TRAILING_WHITESPACE )
