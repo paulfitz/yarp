@@ -1294,6 +1294,7 @@ void t_yarp_generator::generate_struct(t_struct* tstruct) {
       }
     }
   }
+  indent(out) << "set_dirty_flags(false);" << endl;
   scope_down(out);
 
   // Fill-out constructor
@@ -1322,6 +1323,7 @@ void t_yarp_generator::generate_struct(t_struct* tstruct) {
   }
   out << " {" << endl;
   indent_up();
+  indent(out) << "set_dirty_flags(true);" << endl;
   scope_down(out);
 
   // Copy constructor
@@ -1372,6 +1374,38 @@ void t_yarp_generator::generate_struct(t_struct* tstruct) {
   indent(f_stt_) << endl;
   indent(f_stt_) << "// if you want to serialize this class without nesting, use this helper" << endl;
   indent(f_stt_) << "typedef yarp::os::idl::Unwrapped<" << namespace_decorate(ns,name) << " > unwrapped;" << endl;
+  indent(f_stt_) << endl;
+  // now add setters, getters, individual serializers, and dirty flags?
+
+  for (mem_iter = members.begin() ; mem_iter != members.end(); mem_iter++) {
+    string mname = (*mem_iter)->get_name();
+    string mtype = print_type((*mem_iter)->get_type());
+
+    f_stt_ << print_doc(*mem_iter);
+    indent(f_stt_) << "void mark_for_send_" << mname << "() { is_dirty_" << mname << " = true; }" << endl; 
+  }
+
+  indent_down();
+  indent(f_stt_) << "private:" << endl;
+  indent_up();
+
+  indent(f_stt_) << "void set_dirty_flags(bool flag) {" << endl;
+  indent_up();
+  for (mem_iter = members.begin() ; mem_iter != members.end(); mem_iter++) {
+    string mname = (*mem_iter)->get_name();
+    string mtype = print_type((*mem_iter)->get_type());
+    f_stt_ << print_doc(*mem_iter);
+    indent(f_stt_) << "is_dirty_" << mname << " = flag;" << endl; 
+  }
+  indent_down();
+  indent(f_stt_) << "}" << endl;
+
+  for (mem_iter = members.begin() ; mem_iter != members.end(); mem_iter++) {
+    string mname = (*mem_iter)->get_name();
+    string mtype = print_type((*mem_iter)->get_type());
+    f_stt_ << print_doc(*mem_iter);
+    indent(f_stt_) << "bool is_dirty_" << mname << ";" << endl; 
+  }
 
   indent_down();
   f_stt_ << "};" << endl;
