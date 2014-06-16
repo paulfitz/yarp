@@ -1382,7 +1382,7 @@ void t_yarp_generator::generate_struct(t_struct* tstruct) {
     string mtype = print_type((*mem_iter)->get_type());
 
     f_stt_ << print_doc(*mem_iter);
-    indent(f_stt_) << "void mark_for_send_" << mname << "() { is_dirty_" << mname << " = true; }" << endl; 
+    indent(f_stt_) << "void mark_dirty_" << mname << "() { is_dirty_" << mname << " = true; }" << endl; 
   }
 
   indent_down();
