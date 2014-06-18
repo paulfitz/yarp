@@ -7,6 +7,7 @@
  */
 
 #include <yarp/os/PortablePair.h>
+#include <yarp/os/DummyConnector.h>
 
 
 bool yarp::os::PortablePairBase::readPair(ConnectionReader& connection,
@@ -46,3 +47,4 @@ bool yarp::os::PortablePairBase::writePair(ConnectionWriter& connection,
 
     return ok;
 }
+

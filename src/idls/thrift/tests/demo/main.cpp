@@ -573,32 +573,121 @@ bool test_tostring() {
     s.lst.push_back(DemoStruct(5,10));
     s.lst.push_back(DemoStruct(9,900));
     printf("String: %s\n", s.toString().c_str());
-    if (s.toString() != "(5 10) (9 900)") {
+    if (s.toString() != "((5 10) (9 900))") {
         fprintf(stderr, "string mismatch\n");
         return false;
     }
+
+    DemoStruct d;
+    d.x = 10;
+    d.y = 20;
+    printf("String: %s\n", d.toString().c_str());
+    if (d.toString() != "10 20") {
+        fprintf(stderr, "string mismatch\n");
+        return false;
+    }
+
     return true;
 }
 
 bool test_editor() {
     printf("\n*** test_editor()\n");
     DemoStruct d;
+    d.x = 0;
+    d.y = 0;
     DemoStruct::Editor e(d,false);
     e.set_x(15);
     Bottle b;
     b.read(e);
-    printf(">>> %s\n", b.toString().c_str());
+    printf(">>> set_x -> %s\n", b.toString().c_str());
+    if (b.size()!=1) {
+        fprintf(stderr, "wrong length after set_x\n");
+        return false;
+    }
+    if (b.get(0).asList()==NULL) {
+        fprintf(stderr, "wrong type after set_x\n");
+        return false;
+    }
+    if (b.get(0).asList()->get(0).asString()!="x") {
+        fprintf(stderr, "wrong tag after set_x\n");
+        return false;
+    }
+    if (b.get(0).asList()->get(1).asInt()!=15) {
+        fprintf(stderr, "wrong value after set_x\n");
+        return false;
+    }
+
     e.clean();
     e.set_y(30);
     b.read(e);
-    printf(">>> %s\n", b.toString().c_str());
+    printf(">>> set_y -> %s\n", b.toString().c_str());
+    if (b.size()!=1) {
+        fprintf(stderr, "wrong length after set_y\n");
+        return false;
+    }
+    if (b.get(0).asList()==NULL) {
+        fprintf(stderr, "wrong type after set_y\n");
+        return false;
+    }
+    if (b.get(0).asList()->get(0).asString()!="y") {
+        fprintf(stderr, "wrong tag after set_y\n");
+        return false;
+    }
+    if (b.get(0).asList()->get(1).asInt()!=30) {
+        fprintf(stderr, "wrong value after set_y\n");
+        return false;
+    }
+
     e.clean();
     e.set_x(1);
     e.set_y(2);
     b.read(e);
-    printf(">>> %s\n", b.toString().c_str());
-    b.read(d);
-    printf(">>> %s\n", b.toString().c_str());
+    printf(">>> set_x set_y %s\n", b.toString().c_str());
+    if (b.size()!=2) {
+        fprintf(stderr, "wrong length after set_x set_y\n");
+        return false;
+    }
+    if (b.get(0).asList()==NULL) {
+        fprintf(stderr, "wrong type 0 after set_x set_y\n");
+        return false;
+    }
+    if (b.get(1).asList()==NULL) {
+        fprintf(stderr, "wrong type 1 after set_x set_y\n");
+        return false;
+    }
+    if (b.get(0).asList()->get(0).asString()!="x") {
+        fprintf(stderr, "wrong x tag after set_x set_y\n");
+        return false;
+    }
+    if (b.get(0).asList()->get(1).asInt()!=1) {
+        fprintf(stderr, "wrong x value after set_x set_y\n");
+        return false;
+    }
+    if (b.get(1).asList()->get(0).asString()!="y") {
+        fprintf(stderr, "wrong y tag after set_x set_y\n");
+        return false;
+    }
+    if (b.get(1).asList()->get(1).asInt()!=2) {
+        fprintf(stderr, "wrong y value after set_x set_y\n");
+        return false;
+    }
+
+    DemoStruct d2;
+    DemoStruct::Editor e2(d2,false);
+    d2.x = 99;
+    d2.y = 99;
+    e.clean();
+    e.set_y(30);
+    Portable::copyPortable(e,e2);
+    if (d2.x!=99) {
+        fprintf(stderr, "wrong x value after patch\n");
+        return false;
+    }
+    if (d2.y!=30) {
+        fprintf(stderr, "wrong y value after patch\n");
+        return false;
+    }
+
     return true;
 }
 

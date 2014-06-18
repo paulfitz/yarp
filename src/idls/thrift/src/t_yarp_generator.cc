@@ -1621,7 +1621,38 @@ void t_yarp_generator::generate_struct(t_struct* tstruct) {
 		<< "::Editor::read(yarp::os::ConnectionReader& connection) {" 
 		<< endl;
     indent_up();
-    indent(out) << "return false;" << endl;
+    indent(out) << "yarp::os::idl::WireReader reader(connection);" << endl;
+    indent(out) << "if (!reader.readListHeader()) return false;" << endl;
+    indent(out) << "int len = reader.getLength();" << endl;
+    indent(out) << "for (int i=0; i<len; i++) {" << endl;
+    indent_up();
+    indent(out) << "if (!reader.readListHeader(2)) return false;" << endl;
+    indent(out) << "yarp::os::ConstString key;" << endl;
+    indent(out) << "if (!reader.readString(key)) return false;" << endl;
+    indent(out) << "// inefficient code follows, bug paulfitz to improve it" << endl;
+    for (mem_iter=members.begin() ; mem_iter != members.end(); mem_iter++) {
+      string mname = (*mem_iter)->get_name();
+      if (mem_iter!=members.begin()) {
+	indent_down();
+	indent(out) << "} else ";
+      } else {
+	indent(out);
+      }
+      out <<  "if (key == \"" << mname << "\") {" << endl;
+      indent_up();
+      indent(out) << "if (!obj.read_" << mname << "(reader)) return false;" << endl;
+    }
+    if (members.begin()!=members.end()) {
+      indent_down();
+      indent(out) << "} else {" << endl;
+      indent_up();
+    }
+    indent(out) << "// would be useful to have a fallback here" << endl;
+    if (members.begin()!=members.end()) {
+      scope_down(out);
+    }
+    scope_down(out);
+    indent(out) << "return true;" << endl;
     scope_down(out);
 
     indent(out) << endl;
@@ -1631,9 +1662,8 @@ void t_yarp_generator::generate_struct(t_struct* tstruct) {
 		 << "::toString() {" 
 		 << endl;
   indent_up();
-  indent(f_cpp_) << "yarp::os::idl::UnwrappedView<" << name << " > v(*this);" << endl;
   indent(f_cpp_) << "yarp::os::Bottle b;" << endl;
-  indent(f_cpp_) << "b.read(v);" << endl;
+  indent(f_cpp_) << "b.read(*this);" << endl;
   indent(f_cpp_) << "return b.toString();" << endl;
   scope_down(f_cpp_);
 
