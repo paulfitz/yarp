@@ -577,6 +577,26 @@ bool test_tostring() {
         fprintf(stderr, "string mismatch\n");
         return false;
     }
+
+bool test_editor() {
+    printf("\n*** test_editor()\n");
+    DemoStruct d;
+    DemoStruct::Editor e(d,false);
+    e.set_x(15);
+    Bottle b;
+    b.read(e);
+    printf(">>> %s\n", b.toString().c_str());
+    e.clean();
+    e.set_y(30);
+    b.read(e);
+    printf(">>> %s\n", b.toString().c_str());
+    e.clean();
+    e.set_x(1);
+    e.set_y(2);
+    b.read(e);
+    printf(">>> %s\n", b.toString().c_str());
+    b.read(d);
+    printf(">>> %s\n", b.toString().c_str());
     return true;
 }
 
@@ -607,5 +627,6 @@ int main(int argc, char *argv[]) {
     if (!test_missing_method()) return 1;
     if (!test_unwrap()) return 1;
     if (!test_tostring()) return 1;
+    if (!test_editor()) return 1;
     return 0;
 }
