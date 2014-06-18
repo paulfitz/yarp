@@ -577,6 +577,8 @@ bool test_tostring() {
         fprintf(stderr, "string mismatch\n");
         return false;
     }
+    return true;
+}
 
 bool test_editor() {
     printf("\n*** test_editor()\n");

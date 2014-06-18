@@ -1365,9 +1365,6 @@ void t_yarp_generator::generate_struct(t_struct* tstruct) {
 	      << endl;
 
   indent(out) << endl;
-  indent(out) << "// if you want to serialize this class without nesting, use this helper" << endl;
-  indent(out) << "typedef yarp::os::idl::Unwrapped<" << namespace_decorate(ns,name) << " > unwrapped;" << endl;
-  indent(out) << endl;
 
   indent_down();
   indent(out) << "private:" << endl;
