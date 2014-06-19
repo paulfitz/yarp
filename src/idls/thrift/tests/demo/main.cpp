@@ -98,6 +98,35 @@ public:
     }
 };
 
+class DemoStructCallbacks : public DemoStruct::Editor {
+public:
+    int wsx, dsx, wsy, dsy;
+
+    DemoStructCallbacks() {
+        wsx = dsx = wsy = dsy = 0;
+    }
+
+    virtual bool will_set_x() {
+        printf("will_set_x called, x is %d\n", get_x());
+        wsx = get_x();
+        return true;
+    }
+    virtual bool will_set_y() {
+        printf("will_set_y called, y is %d\n", get_y());
+        wsy = get_y();
+        return true;
+    }
+    virtual bool did_set_x() {
+        printf("did_set_x called, x is %d\n", get_x());
+        dsx = get_x();
+        return true;
+    }
+    virtual bool did_set_y() {
+        printf("did_set_y called, y is %d\n", get_y());
+        dsy = get_y();
+        return true;
+    }
+};
 
 class ClientPeek : public PortReader {
 public:
@@ -595,7 +624,8 @@ bool test_editor() {
     DemoStruct d;
     d.x = 0;
     d.y = 0;
-    DemoStruct::Editor e(d,false);
+    DemoStruct::Editor e;
+    e.edit(d,false);
     e.set_x(15);
     Bottle b;
     b.read(e);
@@ -673,7 +703,8 @@ bool test_editor() {
     }
 
     DemoStruct d2;
-    DemoStruct::Editor e2(d2,false);
+    DemoStruct::Editor e2;
+    e2.edit(d2,false);
     d2.x = 99;
     d2.y = 99;
     e.clean();
@@ -685,6 +716,28 @@ bool test_editor() {
     }
     if (d2.y!=30) {
         fprintf(stderr, "wrong y value after patch\n");
+        return false;
+    }
+
+    DemoStructCallbacks c;
+    c.edit(d2,false);
+    d2.x = 99;
+    d2.y = 99;
+    c.clean();
+    c.set_y(30);
+    if (c.wsy!=99||c.dsy!=30) {
+        fprintf(stderr, "callback muddle\n");
+        return false;
+    }
+
+    DemoStruct d3;
+    d3.x = 0;
+    d3.y = 0;
+    DemoStructCallbacks c2;
+    c2.edit(d3,false);
+    Portable::copyPortable(c,c2);
+    if (c2.wsy!=0||c2.dsy!=30) {
+        fprintf(stderr, "callback muddle\n");
         return false;
     }
 

@@ -1402,31 +1402,64 @@ void t_yarp_generator::generate_struct(t_struct* tstruct) {
 
   // Editor constructor
   indent(out) << endl;
-  indent(out) << "Editor(" << tstruct->get_name() 
-	      << "& obj, bool dirty = true) : obj(obj) {" << endl;
+  indent(out) << "bool edit(" << tstruct->get_name() 
+	      << "& obj, bool dirty = true) {" << endl;
   indent_up();
+  indent(out) << "this->obj = &obj;" << endl;
   indent(out) << "dirty_flags(dirty);" << endl;
   scope_down(out);
 
-  indent(out) << tstruct->get_name() << "& obj;" << endl;
+  // Editor destructor
+  indent(out) << endl;
+  indent(out) << "virtual ~Editor() {}" << endl;
 
+  // Validity check
+  indent(out) << endl;
+  indent(out) << "bool isValid() const {" << endl;
+  indent_up();
+  indent(out) << "return obj!=0/*NULL*/;" << endl;
+  scope_down(out);
+
+  // State
+  indent(out) << endl;
+  indent(out) << tstruct->get_name() << " *obj;" << endl;
+  indent(out) << endl;
+
+  // set
   for (mem_iter = members.begin() ; mem_iter != members.end(); mem_iter++) {
     string mname = (*mem_iter)->get_name();
     t_type* t = get_true_type((*mem_iter)->get_type());
     indent(out) << "void set_" << mname << "(" << type_name(t,false,true) << " " << mname << ") {" << endl;
     indent_up();
-    indent(out) << "obj." << mname << " = " << mname << ";" << endl;
+    indent(out) << "will_set_" << mname << "();" << endl;
+    indent(out) << "obj->" << mname << " = " << mname << ";" << endl;
     indent(out) << "mark_dirty_" << mname << "();" << endl;
+    indent(out) << "did_set_" << mname << "();" << endl;
     scope_down(out);
   }
 
+  // get
   for (mem_iter = members.begin() ; mem_iter != members.end(); mem_iter++) {
     string mname = (*mem_iter)->get_name();
     t_type* t = get_true_type((*mem_iter)->get_type());
     indent(out) <<  type_name(t,false,true) << " get_" << mname << "() {" << endl;
     indent_up();
-    indent(out) << "return obj." << mname << ";" << endl;
+    indent(out) << "return obj->" << mname << ";" << endl;
     scope_down(out);
+  }
+
+  // will_set
+  for (mem_iter = members.begin() ; mem_iter != members.end(); mem_iter++) {
+    string mname = (*mem_iter)->get_name();
+    t_type* t = get_true_type((*mem_iter)->get_type());
+    indent(out) <<  "virtual bool will_set_" << mname << "() { return true; }" << endl;
+  }
+
+  // did_set
+  for (mem_iter = members.begin() ; mem_iter != members.end(); mem_iter++) {
+    string mname = (*mem_iter)->get_name();
+    t_type* t = get_true_type((*mem_iter)->get_type());
+    indent(out) <<  "virtual bool did_set_" << mname << "() { return true; }" << endl;
   }
 
   // mark dirty overall
@@ -1600,6 +1633,7 @@ void t_yarp_generator::generate_struct(t_struct* tstruct) {
 		<< "::Editor::write(yarp::os::ConnectionWriter& connection) {" 
 		<< endl;
     indent_up();
+    indent(out) << "if (!isValid()) return false;" << endl;
     indent(out) << "yarp::os::idl::WireWriter writer(connection);" 
 		<< endl;
     indent(out) << "if (!writer.writeListHeader(dirty_count)) return false;" << endl;
@@ -1609,7 +1643,7 @@ void t_yarp_generator::generate_struct(t_struct* tstruct) {
       indent_up();
       indent(out) << "if (!writer.writeListHeader(2)) return false;" << endl;
       indent(out) << "if (!writer.writeString(\"" << mname << "\")) return false;" << endl;
-      indent(out) << "if (!obj.write_" << mname << "(writer)) return false;" << endl;
+      indent(out) << "if (!obj->write_" << mname << "(writer)) return false;" << endl;
       scope_down(out);
     }
     indent(out) << "return !writer.isError();" 
@@ -1621,6 +1655,7 @@ void t_yarp_generator::generate_struct(t_struct* tstruct) {
 		<< "::Editor::read(yarp::os::ConnectionReader& connection) {" 
 		<< endl;
     indent_up();
+    indent(out) << "if (!isValid()) return false;" << endl;
     indent(out) << "yarp::os::idl::WireReader reader(connection);" << endl;
     indent(out) << "if (!reader.readListHeader()) return false;" << endl;
     indent(out) << "int len = reader.getLength();" << endl;
@@ -1640,7 +1675,9 @@ void t_yarp_generator::generate_struct(t_struct* tstruct) {
       }
       out <<  "if (key == \"" << mname << "\") {" << endl;
       indent_up();
-      indent(out) << "if (!obj.read_" << mname << "(reader)) return false;" << endl;
+      indent(out) << "will_set_" << mname << "();" << endl;
+      indent(out) << "if (!obj->read_" << mname << "(reader)) return false;" << endl;
+      indent(out) << "did_set_" << mname << "();" << endl;
     }
     if (members.begin()!=members.end()) {
       indent_down();
