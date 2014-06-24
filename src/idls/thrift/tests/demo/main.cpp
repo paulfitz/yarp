@@ -630,19 +630,19 @@ bool test_editor() {
     Bottle b;
     b.read(e);
     printf(">>> set_x -> %s\n", b.toString().c_str());
-    if (b.size()!=1) {
+    if (b.size()!=2) {
         fprintf(stderr, "wrong length after set_x\n");
         return false;
     }
-    if (b.get(0).asList()==NULL) {
+    if (b.get(1).asList()==NULL) {
         fprintf(stderr, "wrong type after set_x\n");
         return false;
     }
-    if (b.get(0).asList()->get(0).asString()!="x") {
+    if (b.get(1).asList()->get(0).asString()!="x") {
         fprintf(stderr, "wrong tag after set_x\n");
         return false;
     }
-    if (b.get(0).asList()->get(1).asInt()!=15) {
+    if (b.get(1).asList()->get(1).asInt()!=15) {
         fprintf(stderr, "wrong value after set_x\n");
         return false;
     }
@@ -651,19 +651,19 @@ bool test_editor() {
     e.set_y(30);
     b.read(e);
     printf(">>> set_y -> %s\n", b.toString().c_str());
-    if (b.size()!=1) {
+    if (b.size()!=2) {
         fprintf(stderr, "wrong length after set_y\n");
         return false;
     }
-    if (b.get(0).asList()==NULL) {
+    if (b.get(1).asList()==NULL) {
         fprintf(stderr, "wrong type after set_y\n");
         return false;
     }
-    if (b.get(0).asList()->get(0).asString()!="y") {
+    if (b.get(1).asList()->get(0).asString()!="y") {
         fprintf(stderr, "wrong tag after set_y\n");
         return false;
     }
-    if (b.get(0).asList()->get(1).asInt()!=30) {
+    if (b.get(1).asList()->get(1).asInt()!=30) {
         fprintf(stderr, "wrong value after set_y\n");
         return false;
     }
@@ -673,31 +673,31 @@ bool test_editor() {
     e.set_y(2);
     b.read(e);
     printf(">>> set_x set_y %s\n", b.toString().c_str());
-    if (b.size()!=2) {
+    if (b.size()!=3) {
         fprintf(stderr, "wrong length after set_x set_y\n");
         return false;
     }
-    if (b.get(0).asList()==NULL) {
+    if (b.get(1).asList()==NULL) {
         fprintf(stderr, "wrong type 0 after set_x set_y\n");
         return false;
     }
-    if (b.get(1).asList()==NULL) {
+    if (b.get(2).asList()==NULL) {
         fprintf(stderr, "wrong type 1 after set_x set_y\n");
         return false;
     }
-    if (b.get(0).asList()->get(0).asString()!="x") {
+    if (b.get(1).asList()->get(0).asString()!="x") {
         fprintf(stderr, "wrong x tag after set_x set_y\n");
         return false;
     }
-    if (b.get(0).asList()->get(1).asInt()!=1) {
+    if (b.get(1).asList()->get(1).asInt()!=1) {
         fprintf(stderr, "wrong x value after set_x set_y\n");
         return false;
     }
-    if (b.get(1).asList()->get(0).asString()!="y") {
+    if (b.get(2).asList()->get(0).asString()!="y") {
         fprintf(stderr, "wrong y tag after set_x set_y\n");
         return false;
     }
-    if (b.get(1).asList()->get(1).asInt()!=2) {
+    if (b.get(2).asList()->get(1).asInt()!=2) {
         fprintf(stderr, "wrong y value after set_x set_y\n");
         return false;
     }
@@ -744,6 +744,78 @@ bool test_editor() {
     return true;
 }
 
+bool test_help() {
+    printf("\n*** test_help()\n");
+
+    {
+        Server server;
+        Bottle bot("[help]");
+        DummyConnector con;
+        bot.write(con.getWriter());
+        server.read(con.getReader());
+        bot.read(con.getReader());
+        printf("Service general help is %s\n", bot.toString().c_str());
+        ConstString help = bot.toString();
+        if (help.find("get_answer")==ConstString::npos) {
+            fprintf(stderr,"no list given\n");
+            return false;
+        }
+    }
+
+    {
+        Server server;
+        Bottle bot("[help] get_answer");
+        DummyConnector con;
+        bot.write(con.getWriter());
+        server.read(con.getReader());
+        bot.read(con.getReader());
+        printf("Service specific help is %s\n", bot.toString().c_str());
+        ConstString help = bot.toString();
+        if (help.find("gets the answer")==ConstString::npos) {
+            fprintf(stderr,"no help given\n");
+            return false;
+        }
+    }
+
+    {
+        DemoStruct d;
+        DemoStruct::Editor e;
+        e.edit(d,false);
+        Bottle bot("help");
+        DummyConnector con;
+        
+        bot.write(con.getWriter());
+        e.read(con.getReader());
+        bot.read(con.getReader());
+        printf("Structure general help is %s\n", bot.toString().c_str());
+        ConstString help = bot.toString();
+        if (help.find("x")==ConstString::npos) {
+            fprintf(stderr,"no field list\n");
+            return false;
+        }
+    }
+
+    {
+        DemoStruct d;
+        DemoStruct::Editor e;
+        e.edit(d,false);
+        Bottle bot("help x");
+        DummyConnector con;
+        
+        bot.write(con.getWriter());
+        e.read(con.getReader());
+        bot.read(con.getReader());
+        printf("Structure specific help is %s\n", bot.toString().c_str());
+        ConstString help = bot.toString();
+        if (help.find("this is the x part")==ConstString::npos) {
+            fprintf(stderr,"no help given\n");
+            return false;
+        }
+    }
+
+    return true;
+}
+
 int main(int argc, char *argv[]) {
     if (argc>1) {
         Network yarp;
@@ -772,5 +844,6 @@ int main(int argc, char *argv[]) {
     if (!test_unwrap()) return 1;
     if (!test_tostring()) return 1;
     if (!test_editor()) return 1;
+    if (!test_help()) return 1;
     return 0;
 }
