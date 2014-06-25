@@ -1684,6 +1684,7 @@ void t_yarp_generator::generate_struct(t_struct* tstruct) {
     for (mem_iter = members.begin() ; mem_iter != members.end(); mem_iter++) {
       string mname = (*mem_iter)->get_name();
       indent(out) << "if (field==\"" << mname << "\") {" << endl;
+      indent_up();
       std::vector<std::string> doc;
       quote_doc(doc,*mem_iter);
       indent(out) << "if (!writer.writeListHeader(" << (1+doc.size())
