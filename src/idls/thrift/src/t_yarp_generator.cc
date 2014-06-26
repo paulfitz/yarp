@@ -1436,6 +1436,17 @@ void t_yarp_generator::generate_struct(t_struct* tstruct) {
     indent(out) << "mark_dirty_" << mname << "();" << endl;
     indent(out) << "did_set_" << mname << "();" << endl;
     scope_down(out);
+
+    // other container types: maps, sets
+    if (t->is_list()) {
+      indent(out) << "void set_" << mname << "(int index, " << type_name(((t_list*)t)->get_elem_type(),false,true) << " elem) {" << endl;
+      indent_up();
+      indent(out) << "will_set_" << mname << "();" << endl;
+      indent(out) << "obj->" << mname << "[index] = elem;" << endl;
+      indent(out) << "mark_dirty_" << mname << "();" << endl;
+      indent(out) << "did_set_" << mname << "();" << endl;
+      scope_down(out);
+    }
   }
 
   // get

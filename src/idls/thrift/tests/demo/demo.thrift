@@ -33,6 +33,20 @@ struct DemoStructList {
   1: list<DemoStruct> lst
 }
 
+struct DemoStructExt {
+  /** this is the x part */
+  1: i32 x = 0,
+ 
+  /** this is the y part */
+  2: i32 y = 0,
+
+  /** this is a list of ints */
+  3: list<i32> int_list,
+
+  /** this is a list of structs */
+  4: list<DemoStruct> ds_list
+}
+
 /**
  * Documentation for service
  */

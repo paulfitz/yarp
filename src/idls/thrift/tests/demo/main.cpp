@@ -12,6 +12,7 @@
 #include <yarp/os/all.h>
 #include <Demo.h>
 #include <DemoStructList.h>
+#include <DemoStructExt.h>
 #include <SurfaceMeshWithBoundingBox.h>
 #include <Wrapping.h>
 
@@ -744,6 +745,35 @@ bool test_editor() {
     return true;
 }
 
+
+bool test_list_editor() {
+    printf("\n*** test_list_editor()\n");
+    DemoStructExt d;
+    DemoStructExt::Editor e;
+    e.edit(d,false);
+    e.set_int_list(4,15);
+    Bottle b;
+    b.read(e);
+    printf(">>> set_int_list -> %s\n", b.toString().c_str());
+    if (b.size()!=2) {
+        fprintf(stderr, "wrong length after set_int_list\n");
+        return false;
+    }
+    if (b.get(1).asList()==NULL) {
+        fprintf(stderr, "wrong type after set_x\n");
+        return false;
+    }
+    if (b.get(1).asList()->get(0).asString()!="x") {
+        fprintf(stderr, "wrong tag after set_x\n");
+        return false;
+    }
+    if (b.get(1).asList()->get(1).asInt()!=15) {
+        fprintf(stderr, "wrong value after set_x\n");
+        return false;
+    }
+    return true;
+}
+
 bool test_help() {
     printf("\n*** test_help()\n");
 
@@ -844,6 +874,7 @@ int main(int argc, char *argv[]) {
     if (!test_unwrap()) return 1;
     if (!test_tostring()) return 1;
     if (!test_editor()) return 1;
+    if (!test_list_editor()) return 1;
     if (!test_help()) return 1;
     return 0;
 }
