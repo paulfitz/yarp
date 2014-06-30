@@ -1653,7 +1653,8 @@ void t_yarp_generator::generate_struct(t_struct* tstruct) {
       string mname = (*mem_iter)->get_name();
       indent(out) << "if (is_dirty_" << mname << ") {" << endl;
       indent_up();
-      indent(out) << "if (!writer.writeListHeader(2)) return false;" << endl;
+      indent(out) << "if (!writer.writeListHeader(3)) return false;" << endl;
+      indent(out) << "if (!writer.writeString(\"set\")) return false;" << endl;
       indent(out) << "if (!writer.writeString(\"" << mname << "\")) return false;" << endl;
       indent(out) << "if (!obj->write_" << mname << "(writer)) return false;" << endl;
       scope_down(out);
@@ -1719,8 +1720,10 @@ void t_yarp_generator::generate_struct(t_struct* tstruct) {
     scope_down(out);
     indent(out) << "for (int i=1; i<len; i++) {" << endl;
     indent_up();
-    indent(out) << "if (!reader.readListHeader(2)) return false;" << endl;
+    indent(out) << "if (!reader.readListHeader(3)) return false;" << endl;
+    indent(out) << "yarp::os::ConstString act;" << endl;
     indent(out) << "yarp::os::ConstString key;" << endl;
+    indent(out) << "if (!reader.readString(act)) return false;" << endl;
     indent(out) << "if (!reader.readString(key)) return false;" << endl;
     indent(out) << "// inefficient code follows, bug paulfitz to improve it" << endl;
     for (mem_iter=members.begin() ; mem_iter != members.end(); mem_iter++) {

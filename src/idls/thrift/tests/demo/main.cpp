@@ -639,11 +639,15 @@ bool test_editor() {
         fprintf(stderr, "wrong type after set_x\n");
         return false;
     }
-    if (b.get(1).asList()->get(0).asString()!="x") {
+    if (b.get(1).asList()->get(0).asString()!="set") {
+        fprintf(stderr, "wrong act after set_x\n");
+        return false;
+    }
+    if (b.get(1).asList()->get(1).asString()!="x") {
         fprintf(stderr, "wrong tag after set_x\n");
         return false;
     }
-    if (b.get(1).asList()->get(1).asInt()!=15) {
+    if (b.get(1).asList()->get(2).asInt()!=15) {
         fprintf(stderr, "wrong value after set_x\n");
         return false;
     }
@@ -660,11 +664,11 @@ bool test_editor() {
         fprintf(stderr, "wrong type after set_y\n");
         return false;
     }
-    if (b.get(1).asList()->get(0).asString()!="y") {
+    if (b.get(1).asList()->get(1).asString()!="y") {
         fprintf(stderr, "wrong tag after set_y\n");
         return false;
     }
-    if (b.get(1).asList()->get(1).asInt()!=30) {
+    if (b.get(1).asList()->get(2).asInt()!=30) {
         fprintf(stderr, "wrong value after set_y\n");
         return false;
     }
@@ -673,7 +677,7 @@ bool test_editor() {
     e.set_x(1);
     e.set_y(2);
     b.read(e);
-    printf(">>> set_x set_y %s\n", b.toString().c_str());
+    printf(">>> set_x set_y -> %s\n", b.toString().c_str());
     if (b.size()!=3) {
         fprintf(stderr, "wrong length after set_x set_y\n");
         return false;
@@ -686,19 +690,19 @@ bool test_editor() {
         fprintf(stderr, "wrong type 1 after set_x set_y\n");
         return false;
     }
-    if (b.get(1).asList()->get(0).asString()!="x") {
+    if (b.get(1).asList()->get(1).asString()!="x") {
         fprintf(stderr, "wrong x tag after set_x set_y\n");
         return false;
     }
-    if (b.get(1).asList()->get(1).asInt()!=1) {
+    if (b.get(1).asList()->get(2).asInt()!=1) {
         fprintf(stderr, "wrong x value after set_x set_y\n");
         return false;
     }
-    if (b.get(2).asList()->get(0).asString()!="y") {
+    if (b.get(2).asList()->get(1).asString()!="y") {
         fprintf(stderr, "wrong y tag after set_x set_y\n");
         return false;
     }
-    if (b.get(2).asList()->get(1).asInt()!=2) {
+    if (b.get(2).asList()->get(2).asInt()!=2) {
         fprintf(stderr, "wrong y value after set_x set_y\n");
         return false;
     }
@@ -749,6 +753,7 @@ bool test_editor() {
 bool test_list_editor() {
     printf("\n*** test_list_editor()\n");
     DemoStructExt d;
+    d.int_list.resize(5);
     DemoStructExt::Editor e;
     e.edit(d,false);
     e.set_int_list(4,15);
@@ -760,7 +765,7 @@ bool test_list_editor() {
         return false;
     }
     if (b.get(1).asList()==NULL) {
-        fprintf(stderr, "wrong type after set_x\n");
+        fprintf(stderr, "wrong type after set_int_list\n");
         return false;
     }
     if (b.get(1).asList()->get(0).asString()!="x") {
