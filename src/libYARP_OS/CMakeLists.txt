@@ -73,6 +73,7 @@ set(YARP_OS_HDRS include/yarp/os/AbstractCarrier.h
                  include/yarp/os/PortWriterBuffer.h
                  include/yarp/os/PortWriter.h
                  include/yarp/os/Property.h
+                 include/yarp/os/Publisher.h
                  include/yarp/os/Random.h
                  include/yarp/os/RateThread.h
                  include/yarp/os/ResourceFinder.h

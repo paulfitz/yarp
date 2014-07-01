@@ -267,8 +267,13 @@ public:
 
     virtual void releaseProperties(Property *prop);
 
+    bool sharedOpen(Port& port);
+
 private:
     void *implementation;
+    bool owned;
+
+    void *needImplementation() const;
 
     bool open(const Contact& contact, bool registerName,
               const char *fakeName);

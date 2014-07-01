@@ -52,8 +52,14 @@ public:
         T example;
         port.promiseType(example.getType());
         port.enableBackgroundWrite(true);
-        reader.attach(port);
-        writer.attach(port);
+        interrupted = false;
+    }
+
+    /**
+     * Wrap an existing unbuffered port.
+     */
+    BufferedPort(Port& port) {
+        sharedOpen(port);
         interrupted = false;
     }
 
@@ -74,6 +80,8 @@ public:
 
     // documentation provided in Contactable
     virtual bool open(const Contact& contact, bool registerName = true) {
+        reader.attach(port);
+        writer.attach(port);
         return port.open(contact,registerName);
     }
 
@@ -188,6 +196,21 @@ public:
         write(true);
     }
 
+    /**
+     *
+     * Wait for any pending writes to complete.
+     *
+     */
+    void waitForWrite() {
+        writer.waitForWrite();
+    }
+
+    /**
+     *
+     * Never drop any messages read.  If you can't read them as
+     * fast as the come in, watch out.
+     *
+     */
     void setStrict(bool strict=true) {
         reader.setStrict(strict);
     }
@@ -341,6 +364,14 @@ private:
     // forbid this
     const BufferedPort& operator = (const BufferedPort& alt) {
         return *this;
+    }
+
+    bool sharedOpen(Port& port) {
+        bool ok = this->port.sharedOpen(port);
+        if (!ok) return false;
+        reader.attach(port);
+        writer.attach(port);
+        return true;
     }
 };
 
