@@ -7,8 +7,8 @@
  *
  */
 
-#ifndef _YARP2_PUBLISHER_
-#define _YARP2_PUBLISHER_
+#ifndef _YARP2_SUBSCRIBER_
+#define _YARP2_SUBSCRIBER_
 
 #include <yarp/os/Log.h>
 #include <yarp/os/AbstractContactable.h>
@@ -16,28 +16,28 @@
 
 namespace yarp {
     namespace os {
-         template <class T> class Publisher;
+         template <class T> class Subscriber;
     }
 }
 
 template <class T>
-class yarp::os::Publisher : public AbstractContactable {
+class yarp::os::Subscriber : public AbstractContactable {
 public:
     using Contactable::open;
 
-    Publisher(const ConstString& name = "") {
+    Subscriber(const ConstString& name = "") {
         buffered_port = 0 /*NULL*/;
         T example;
         port.promiseType(example.getType());
-        port.setInputMode(false);
-        port.setOutputMode(true);
+        port.setInputMode(true);
+        port.setOutputMode(false);
         port.setRpcMode(false);
         if (name!="") {
             YARP_ASSERT(topic(name));
         }
     }
 
-    virtual ~Publisher() {
+    virtual ~Subscriber() {
         clear();
     }
 
@@ -78,16 +78,8 @@ public:
         active().setReader(reader);
     }
 
-    T& prepare() {
-        return buffer().prepare();
-    }
-
-    void write(bool forceStrict=false) {
-        buffer().write(forceStrict);
-    }
-
-    void waitForWrite() {
-        buffer().waitForWrite();
+    T *read(bool wait = true) {
+        return buffer().read(wait);
     }
 
     virtual Port& asPort() {

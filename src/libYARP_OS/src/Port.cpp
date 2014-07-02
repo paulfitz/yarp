@@ -46,6 +46,7 @@ private:
     bool usedForRpc;
 
 public:
+    bool includeNode;
     bool commitToRead;
     bool commitToWrite;
     bool commitToRpc;
@@ -70,6 +71,7 @@ public:
         usedForRead(false),
         usedForWrite(false),
         usedForRpc(false),
+        includeNode(false),
         commitToRead(false),
         commitToWrite(false),
         commitToRpc(false)
@@ -335,6 +337,11 @@ public:
         this->typ = typ;
         stateMutex.post();
     }
+
+    void includeNodeInName(bool flag) {
+        includeNode = flag;
+    }
+
 };
 
 void *Port::needImplementation() const {
@@ -396,13 +403,15 @@ bool Port::open(const Contact& contact, bool registerName,
         }
     }
 
-    if (n!="" && n[0]!='/'  && n[0]!='=' && n!="..." && n.substr(0,3)!="...") {
-        if (fakeName==NULL) {
-            Nodes& nodes = NameClient::getNameClient().getNodes();
-            ConstString node_name = nodes.getActiveName();
-            if (node_name!="") {
-                // n = node_name + "=/" + n;
-                n = "/" + n + "@" + node_name;
+    PortCoreAdapter *currentCore = &(IMPL());
+    if (currentCore!=NULL) {
+        if (n!="" && (n[0]!='/'||currentCore->includeNode) && n[0]!='=' && n!="..." && n.substr(0,3)!="...") {
+            if (fakeName==NULL) {
+                Nodes& nodes = NameClient::getNameClient().getNodes();
+                ConstString node_name = nodes.getActiveName();
+                if (node_name!="") {
+                    n = (n[0]=='/'?"":"/") + n + "@" + node_name;
+                }
             }
         }
     }
@@ -423,7 +432,6 @@ bool Port::open(const Contact& contact, bool registerName,
             }
         }
     }
-    PortCoreAdapter *currentCore = &(IMPL());
     if (currentCore!=NULL) {
         NestedContact nc;
         nc.fromString(n);
@@ -666,6 +674,7 @@ Contact Port::where() const {
 
 bool Port::addOutput(const Contact& contact) {
     PortCoreAdapter& core = IMPL();
+    if (core.commitToRead) return false;
     if (core.isInterrupted()) return false;
     core.alertOnWrite();
     ConstString name;
@@ -883,6 +892,10 @@ Property *Port::acquireProperties(bool readOnly) {
 
 void Port::releaseProperties(Property *prop) {
     IMPL().releaseProperties(prop);
+}
+
+void Port::includeNodeInName(bool flag) {
+    IMPL().includeNodeInName(flag);
 }
 
 bool Port::sharedOpen(Port& port) {

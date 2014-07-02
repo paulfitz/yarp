@@ -5,6 +5,7 @@
 project(YARP_OS)
 
 set(YARP_OS_HDRS include/yarp/os/AbstractCarrier.h
+                 include/yarp/os/AbstractContactable.h
                  include/yarp/os/all.h
                  include/yarp/os/api.h
                  include/yarp/os/begin_pack_for_net.h
@@ -97,6 +98,7 @@ set(YARP_OS_HDRS include/yarp/os/AbstractCarrier.h
                  include/yarp/os/Stamp.h
                  include/yarp/os/StringInputStream.h
                  include/yarp/os/StringOutputStream.h
+                 include/yarp/os/Subscriber.h
                  include/yarp/os/SystemClock.h
                  include/yarp/os/Terminator.h
                  include/yarp/os/Things.h

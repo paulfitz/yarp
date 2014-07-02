@@ -267,6 +267,8 @@ public:
 
     virtual void releaseProperties(Property *prop);
 
+    virtual void includeNodeInName(bool flag);
+
     bool sharedOpen(Port& port);
 
 private:

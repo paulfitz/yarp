@@ -11,6 +11,7 @@
 #include <yarp/os/impl/UnitTest.h>
 
 #include <yarp/os/Publisher.h>
+#include <yarp/os/Subscriber.h>
 #include <yarp/os/Node.h>
 #include <yarp/os/Network.h>
 #include <yarp/os/Time.h>
@@ -34,12 +35,11 @@ class PublisherTest : public UnitTest {
 public:
     virtual ConstString getName() { return "PublisherTest"; }
 
-    void testBasic() {
-        report(0,"basic publisher test");
+    void testPublisherToBufferedPort() {
+        report(0,"Publisher to BufferedPort test");
 
         Node n("/node");
-        Publisher<Bottle> p;
-        p.open("very_interesting_topic");
+        Publisher<Bottle> p("/very_interesting_topic");
 
         {
             Node n2("/node2");
@@ -63,9 +63,39 @@ public:
         }
     }
 
+    void testBufferedPortToSubscriber() {
+        report(0,"BufferedPort to Subscriber test");
+
+        Node n("/node");
+        BufferedPort<Bottle> pout;
+        pout.setWriteOnly();
+        pout.open("very_interesting_topic");
+
+        {           
+            Node n2("/node2");
+            Subscriber<Bottle> pin("/very_interesting_topic");
+            pin.read(false); // make sure we are in buffed mode
+
+            waitForOutput(pout,10);
+            
+            Bottle& b = pout.prepare();
+            b.clear();
+            b.addInt(42);
+            pout.write();
+            pout.waitForWrite();
+
+            Bottle *bin = pin.read();
+            checkTrue(bin!=NULL,"message arrived");
+            if (!bin) return;
+            checkEqual(bin->get(0).asInt(),42,"message is correct");
+        }
+    }
+
     virtual void runTests() {
         Network::setLocalMode(true);
-        testBasic();
+        testPublisherToBufferedPort();
+        testBufferedPortToSubscriber();
+        //testPublisherToSubscriber();
         Network::setLocalMode(false);
     }
 };

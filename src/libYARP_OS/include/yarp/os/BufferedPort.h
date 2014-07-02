@@ -351,6 +351,10 @@ public:
         port.releaseProperties(prop);
     }
 
+    virtual void includeNodeInName(bool flag) {
+        return port.includeNodeInName(flag);
+    }
+
 private:
     PortWriterBuffer<T> writer;
     Port port;
