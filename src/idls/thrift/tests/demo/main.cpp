@@ -765,15 +765,19 @@ bool test_list_editor() {
         return false;
     }
     if (b.get(1).asList()==NULL) {
-        fprintf(stderr, "wrong type after set_int_list\n");
+        fprintf(stderr, "no patch after set_int_list\n");
         return false;
     }
-    if (b.get(1).asList()->get(0).asString()!="x") {
-        fprintf(stderr, "wrong tag after set_x\n");
+    if (b.get(1).asList()->get(1).asString()!="int_list") {
+        fprintf(stderr, "wrong tag after set_int_list\n");
         return false;
     }
-    if (b.get(1).asList()->get(1).asInt()!=15) {
-        fprintf(stderr, "wrong value after set_x\n");
+    if (b.get(1).asList()->get(2).asList()==NULL) {
+        fprintf(stderr, "no list after set_int_list\n");
+        return false;
+    }
+    if (b.get(1).asList()->get(2).asList()->get(4).asInt()!=15) {
+        fprintf(stderr, "wrong value after set_int_list\n");
         return false;
     }
     return true;
