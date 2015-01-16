@@ -40,7 +40,15 @@ bool yarp::os::Stamp::isValid() {
 }
 
 bool yarp::os::Stamp::read(ConnectionReader& connection) {
-    connection.convertTextMode();
+    if (connection.isTextMode()) {
+        Bottle b;
+        b.read(connection);
+        if (b.size()!=2) return false;
+        sequenceNumber = b.get(0).asInt();
+        timeStamp = b.get(1).asDouble();
+        return true;
+    }
+    //connection.convertTextMode();
     int header = connection.expectInt();
     if (header!=BOTTLE_TAG_LIST) {
         return false;
@@ -69,6 +77,12 @@ bool yarp::os::Stamp::read(ConnectionReader& connection) {
 }
 
 bool yarp::os::Stamp::write(ConnectionWriter& connection) {
+    if (connection.isTextMode()) {
+        Bottle b;
+        b.addInt(sequenceNumber);
+        b.addDouble(timeStamp);
+        return b.write(connection);
+    }
     connection.appendInt(BOTTLE_TAG_LIST); // nested structure
     connection.appendInt(2);               // with two elements
     connection.appendInt(BOTTLE_TAG_INT);

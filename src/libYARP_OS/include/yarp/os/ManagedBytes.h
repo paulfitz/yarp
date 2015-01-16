@@ -130,6 +130,10 @@ public:
 
     bool write(ConnectionWriter& writer);
 
+    bool isOwner() const {
+        return owned;
+    }
+
 private:
     Bytes b;
     bool owned;

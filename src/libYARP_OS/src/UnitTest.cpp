@@ -192,9 +192,11 @@ bool UnitTest::checkEqualImpl(const String& x, const String& y,
                               const char *txt2,
                               const char *fname,
                               int fline) {
-    char buf[1000];
+    char buf[20000];
+    ConstString humanized_x = humanize(x);
+    ConstString humanized_y = humanize(y);
     ACE_OS::sprintf(buf, "in file %s:%d [%s] %s (%s) == %s (%s)",
-                    fname, fline, desc, txt1, humanize(x).c_str(), txt2, humanize(y).c_str());
+                    fname, fline, desc, txt1, humanized_x.c_str(), txt2, humanized_y.c_str());
     bool ok = (x==y);
     if (ok) {
         report(0,String("  [") + desc + "] passed ok");
@@ -248,4 +250,92 @@ void UnitTest::restoreEnvironment() {
     env.clear();
 }
 
- 
+static int _count_mem = 0;
+static bool _counting = false;
+static bool _count_block = false;
+#include <yarp/os/Mutex.h>
+static yarp::os::Mutex *_count_mutex = NULL;
+#ifdef YARP_TEST_HEAP
+static int _count_new = 0;
+static int _count_del = 0;
+#include <cstdio>
+#include <cstdlib>
+void* operator new(std::size_t sz) {
+    if (_counting) {
+        _count_mutex->lock();
+        if (_count_block) {
+            fprintf(stderr,"unexpected new detected\n");
+            yarp_print_trace(stderr,__FILE__,__LINE__);
+        }
+        //std::printf("global op new called, size = %zu\n",sz);
+        _count_mem++;
+        _count_new++;
+        _count_mutex->unlock();
+    }
+    return std::malloc(sz);
+}
+void operator delete(void* ptr) 
+{
+    if (_counting) {
+        _count_mutex->lock();
+        if (_count_block) {
+            fprintf(stderr,"unexpected delete detected\n");
+            yarp_print_trace(stderr,__FILE__,__LINE__);
+        }
+        //std::puts("global op delete called");
+        _count_mem++;
+        _count_del++;
+        _count_mutex->unlock();
+    }
+    std::free(ptr);
+}
+#endif
+
+
+bool UnitTest::heapMonitorSupported() {
+#ifdef YARP_TEST_HEAP
+    return true;
+#else
+    return false;
+#endif
+}
+
+void UnitTest::heapMonitorBegin() {
+    // please, do not be allocating yet, no threads
+    heapMonitorEnd();
+    _count_mutex = new Mutex();
+    _count_mem = 0;
+    _counting = true;
+}
+
+void UnitTest::heapMonitorBlock() {
+    heapMonitorEnd();
+    _count_block = true;
+    _count_mutex = new Mutex();
+    _count_mem = 0;
+    _counting = true;
+}
+
+int UnitTest::heapMonitorOps() {
+    _count_mutex->lock();
+    int del = _count_mem;
+    _count_mem = 0;
+    _count_mutex->unlock();
+    return del;
+}
+
+
+int UnitTest::heapMonitorEnd() {
+    // please, be done allocating, no threads
+    _counting = false;
+    if (_count_block) {
+        checkEqual(0,_count_mem,"heap operator count");
+    }
+    _count_block = false;
+    if (_count_mutex==NULL) return 0;
+    delete _count_mutex;
+    _count_mutex = NULL;
+    return _count_mem;
+}
+
+

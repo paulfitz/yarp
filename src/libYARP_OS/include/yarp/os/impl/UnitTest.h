@@ -88,6 +88,12 @@ public:
         return !hasProblem;
     }
 
+    static bool heapMonitorSupported();
+    void heapMonitorBegin();
+    void heapMonitorBlock();
+    int heapMonitorOps();
+    int heapMonitorEnd();
+
 private:
     UnitTest *parent;
     PlatformVector<UnitTest *> subTests;
