@@ -393,7 +393,7 @@ bool RosTypeCodeGenYarp::writeField(bool bare, const RosField& field) {
     fprintf(out,"    // *** %s ***\n", field.rosName.c_str());
     if (field.rosType=="string") {
         // strings are special; variable length primitive
-        string tweak = bare?"":"+1";
+        string tweak = ""; //bare?"":"+1";
         if (field.isArray) {
             if (!bare) {
                 fprintf(out,"    connection.appendInt(BOTTLE_TAG_LIST|BOTTLE_TAG_STRING);\n");
